@@ -1,0 +1,7 @@
+name: mfe_casp16_l3000_stage1
+path: data/Boltz2_structures/L3000
+mode: inference
+ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
+ground_truth_format: csv
+target_pattern: "L*"
+series_group: mfe_casp16_stage1  # CASP16 L1000/L3000 pair for weighted aggregation

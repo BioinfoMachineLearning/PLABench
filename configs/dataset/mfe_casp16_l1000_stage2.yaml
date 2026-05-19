@@ -1,0 +1,7 @@
+name: mfe_casp16_l1000_stage2
+path: data/casp16_data/stage2_input/L1000_prepared
+mode: inference
+ground_truth_path: data/casp16_data/labels/L1000_exper_affinity.csv
+ground_truth_format: csv
+target_pattern: "L*"
+series_group: mfe_casp16_stage2  # CASP16 L1000/L3000 pair for weighted aggregation

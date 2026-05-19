@@ -1,0 +1,9 @@
+
+# configs/model/haiping.yaml
+name: haiping
+type: gnn
+# Absolute path to model checkpoint
+model_path: forks/haiping_methods/work3_VS_n_general_competation_gtrans_RG_cutoff0.8_redo/full_model_out1800.model
+aa_dict_path: forks/haiping_methods/work3_VS_n_general_competation_gtrans_RG_cutoff0.8_redo/aa_vec_dic.npy
+device: cuda
+models_source_dir: forks/haiping_methods/work3_VS_n_general_competation_gtrans_RG_cutoff0.8_redo/models

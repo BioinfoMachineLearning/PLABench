@@ -1,0 +1,9 @@
+# Sequence-based models (LLF/MixingDTA/DeepDTA) on ChEMBL35 Dataset A
+# Uses standardized CSV with compound_id, target_sequence, compound_iso_smiles, affinity
+# Uses PDBbind-trained model (default for non-davis/kiba datasets)
+name: sequence_chembl35_full
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true  # split by compound_id prefix (UniProt_ID); skip pooled

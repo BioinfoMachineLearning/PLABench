@@ -1,0 +1,6 @@
+# Boltz2 affinity prediction on CSAR-HIQ_36
+name: boltz2_csar_hiq36
+standardized_csv: data/Structure_independent/CSAR-HIQ_36_standardized_test.csv
+ground_truth_path: data/CSAR-HIQ_36/index.txt
+ground_truth_format: csv
+path: data/CSAR-HIQ_36

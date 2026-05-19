@@ -1,0 +1,18 @@
+# CASF-2013: Boltz2 protein + Experimental ligand SDF (RDKit SMILES)
+name: casf2013_boltz2
+mode: casf2013_boltz2
+boltz2_mode: true
+
+# Boltz2 predicted protein structures directory
+# Contains: {pdb_id}_protein.pdb, {pdb_id}_ligand.pdb, {pdb_id}_ligand.mol2
+path: data/Boltz2_structures/casf2013
+prot_pattern: "{pdb_id}_protein.pdb"
+lig_pattern: "{pdb_id}_ligand.mol2"
+
+# Experimental ligand SDF source (CASF-2013 coreset)
+# Structure: coreset/{pdb_id}/{pdb_id}_ligand.sdf
+experimental_sdf_dir: data/CASF-2013/coreset
+
+# Ground truth: CoreSet.dat (space-delimited, column 4 = -logKd/Ki)
+ground_truth_path: data/CASF-2013/power_scoring/CoreSet.dat
+ground_truth_format: casf_dat

@@ -1,0 +1,11 @@
+# AF3 prediction on remaining 74 targets (7091 compounds) — chembl35_full minus already-done 559
+# Used by: bapred. After this finishes, merge with the 559 done into _full predictions.csv.
+name: af3_chembl35_remaining
+path: data/AF3_structures/chembl35_full
+mode: stage1
+target_pattern: "*"
+ground_truth_path: tmp/chembl35_remaining_input.csv
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+multi_protein: true

@@ -1,0 +1,14 @@
+# v6: same training data scope as v4 (12378 PDBbind PDBs) but SMILES come
+# from v1's OpenBabel pybel.write("can") + RDKit canonicalize pipeline,
+# NOT my new canonical_smiles() pipeline.  Hypothesis: matches or beats v1
+# on chembl35 since data is strictly larger than v1's refined 4465.
+name: sequence_chembl35_full_v6
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true
+
+task: pdbbind_v6
+model_path: forks/LLF/models/pdbbind_v6/best_model_full.pth
+max_seq_len: 1200

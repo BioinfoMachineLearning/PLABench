@@ -1,0 +1,17 @@
+name: davis_cold_drug
+# Cold drug test file is unique (test_Drug.pkl converted to csv?)
+# We need to verify if we have CSV versions of cold data.
+# Assuming we will convert them or point to existing ones.
+# Providing a placeholder for now, runner script must handle file selection.
+path: data/Structure_independent/DAVIS/cold/test_drug.csv 
+test_file: data/Structure_independent/DAVIS/cold/test_drug.csv
+fold: 1
+task: cold_drug
+label_column: label
+smiles_column: compound_iso_smiles
+sequence_column: target_sequence
+target_id_column: Target ID
+experiment_type: sequence
+problem_type: regression
+metric_type: correlation
+dataset_name: davis_cold_drug

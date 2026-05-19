@@ -1,0 +1,19 @@
+name: mixingdta
+type: sequence
+
+# Use absolute path to original project weights as confirmed by user
+model_dir: forks/MixingDTA/MEETA/results_refined_91
+models_source_dir: forks/MixingDTA
+
+# Output directory structure
+output_dir: outputs/${model.name}/${dataset.name}/latest
+
+# Device
+device: cuda
+
+# Environment
+python_bin: /home/lwfvx/miniforge3/envs/MixingDTA/bin/python
+
+# Defaults
+fold: 1
+task: warm_start

@@ -1,0 +1,7 @@
+
+name: deepdta
+type: sequence
+model_dir: forks/DeepDTA-Pytorch/pdbbind2020_refined91_results
+models_source_dir: forks/DeepDTA-Pytorch
+output_dir: outputs/${model.name}/${dataset.name}/latest
+device: cuda

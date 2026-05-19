@@ -1,0 +1,6 @@
+name: mfe_casf2013_exp
+path: data/casf2013_exp_prepared
+mode: inference
+ground_truth_path: data/CASF-2013/power_scoring/CoreSet.dat
+ground_truth_format: casf_dat
+target_pattern: "*"

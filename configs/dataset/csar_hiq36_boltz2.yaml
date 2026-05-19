@@ -1,0 +1,15 @@
+name: csar_hiq36_boltz2
+mode: csar_hiq36_boltz2
+boltz2_mode: true
+
+# Boltz2 predicted protein structures directory
+# Contains: {pdb_id}_protein.pdb (flat naming)
+path: ${hydra:runtime.cwd}/data/Boltz2_structures/csar36
+prot_pattern: "{pdb_id}_protein.pdb"
+lig_pattern: "{pdb_id}_ligand.mol2"
+
+# Experimental ligand SDF source (CSAR-HIQ_36 coreset)
+experimental_sdf_dir: ${hydra:runtime.cwd}/data/CSAR-HIQ_36
+
+# Ground truth
+ground_truth_path: ${hydra:runtime.cwd}/data/CSAR-HIQ_36/index.txt

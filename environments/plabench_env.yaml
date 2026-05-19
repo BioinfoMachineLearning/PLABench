@@ -1,0 +1,24 @@
+name: plabench
+channels:
+  - conda-forge
+  - pytorch
+  - pyg
+dependencies:
+  - python=3.8
+  - pymol-open-source
+  - rdkit
+  - openbabel
+  - scipy
+  - scikit-learn
+  - numpy
+  - pandas
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.8
+  - pyg
+  - networkx
+  - biopython
+  - hydra-core
+  - omegaconf
+  - tqdm

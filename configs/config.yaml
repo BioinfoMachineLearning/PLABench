@@ -1,0 +1,10 @@
+
+# configs/config.yaml
+defaults:
+  - model: haiping
+  - dataset: casp16_l1000_stage1
+  - _self_
+
+hydra:
+  run:
+    dir: outputs/${model.name}/${dataset.name}/latest

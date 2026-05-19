@@ -1,0 +1,14 @@
+# Sequence-based LLF inference on ChEMBL35 full set, using the v2 model
+# (HiQBind + PDBbind2020 + SPINDR, trained 2026-05).
+# Same input data as sequence_chembl35_full.yaml — only the LLF model changes.
+name: sequence_chembl35_full_v2
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true  # split by compound_id prefix (UniProt_ID); skip pooled
+
+# LLF v2 ckpt + max_seq_len overrides (consumed by llf_wrapper.py).
+task: hiqbind_pdbbind_spider_v2
+model_path: forks/LLF/models/hiqbind_pdbbind_spider_v2/best_model_full.pth
+max_seq_len: 1500

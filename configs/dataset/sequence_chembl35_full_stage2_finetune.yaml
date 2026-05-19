@@ -1,0 +1,10 @@
+name: sequence_chembl35_full_stage2_finetune
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true
+
+task: stage2_finetune
+model_path: forks/LLF/models/stage2_finetune/best_model_full.pth
+max_seq_len: 1500

@@ -1,0 +1,16 @@
+# Sequence-based LLF inference on ChEMBL35 full set, using the v3 model
+# (HiQBind + PDBbind2020 + SPINDR, dropout=0.2, dedup key (sequence,smiles),
+# trained 2026-05-03 with new SMILES standardization in
+# plabench/data_dump/ligand_utils.py).
+# Same input data as sequence_chembl35_full.yaml — only the LLF model changes.
+name: sequence_chembl35_full_v3
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true  # split by compound_id prefix (UniProt_ID); skip pooled
+
+# LLF v3 ckpt + max_seq_len overrides (consumed by llf_wrapper.py).
+task: hiqbind_pdbbind_spider_v3
+model_path: forks/LLF/models/hiqbind_pdbbind_spider_v3/best_model_full.pth
+max_seq_len: 1500

@@ -1,0 +1,6 @@
+name: mfe_csar_hiq36_exp
+path: data/csar_hiq36_exp_prepared
+mode: inference
+ground_truth_path: data/CSAR-HIQ_36/index.txt
+ground_truth_format: csv
+target_pattern: "*"

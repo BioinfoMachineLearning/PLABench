@@ -1,0 +1,13 @@
+# v5_repro: same training input as v1 (old SMILES, 4466 PDBbind refined),
+# same hparams, my pipeline. Chembl35 inference checks if we can reproduce
+# v1's published 0.1941 weighted Pearson — proving pipeline correctness.
+name: sequence_chembl35_full_v5_repro
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true
+
+task: pdbbind_v5_repro
+model_path: forks/LLF/models/pdbbind_v5_repro/best_model_full.pth
+max_seq_len: 1200

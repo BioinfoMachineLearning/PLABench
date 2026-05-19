@@ -1,0 +1,20 @@
+
+name: bapred
+channels:
+  - pytorch
+  - nvidia
+  - dglteam/label/cu124
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pytorch=2.4.0
+  - pytorch-cuda=12.4
+  - dgl=2.4.0
+  - rdkit
+  - pandas
+  - scipy
+  - tqdm
+  - pyyaml
+  - hydra-core
+  - omegaconf
+  - pip

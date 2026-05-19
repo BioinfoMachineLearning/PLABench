@@ -1,0 +1,14 @@
+# CASF-2016: Experimental crystal structures
+name: casf2016_exp
+mode: casf2016_exp
+
+# Experimental protein structures (coreset subdirectories)
+# Structure: coreset/{pdb_id}/{pdb_id}_protein.pdb
+path: data/CASF-2016/coreset
+
+# Experimental ligand SDF source (same coreset)
+experimental_sdf_dir: data/CASF-2016/coreset
+
+# Ground truth
+ground_truth_path: data/CASF-2016/power_scoring/CoreSet.dat
+ground_truth_format: casf_dat

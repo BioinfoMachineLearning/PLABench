@@ -1,0 +1,7 @@
+
+name: sequence_casp16_l1000
+path: data/Structure_independent/L1000_casp16_test.csv
+mode: inference
+ground_truth_path: data/Structure_independent/L1000_casp16_test.csv
+ground_truth_format: csv
+series_group: sequence_casp16  # CASP16 L1000/L3000 pair for weighted aggregation

@@ -1,0 +1,7 @@
+# Boltz2 affinity prediction on ChEMBL35 Dataset A (10 selected targets)
+name: boltz2_chembl35_full
+standardized_csv: data/chembl35/chembl35_full_input.csv
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: chembl35
+path: data/chembl35
+multi_protein: true  # skip pooled; split by compound_id prefix (UniProt_ID)

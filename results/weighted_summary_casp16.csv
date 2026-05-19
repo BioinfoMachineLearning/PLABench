@@ -1,0 +1,10 @@
+Model,Key,Scope,N_total,N_series,RMSE,MSE,Pearson,Spearman,Kendall,CI,Rm2
+bapred,af3_casp16_stage1,series_group,140,2,0.939,0.884,0.547,0.554,0.394,0.698,0.298
+flowdock,af3_casp16_stage1,series_group,140,2,1.196,1.456,0.423,0.448,0.318,0.66,0.156
+boltz2,boltz2_casp16,series_group,140,2,0.959,0.932,0.655,0.635,0.458,0.73,0.321
+flowr_root,af3_casp16_stage1,series_group,140,2,0.899,0.822,0.608,0.607,0.438,0.72,0.383
+haiping,haiping_af3_casp16_stage1,series_group,140,2,1.042,1.089,0.555,0.604,0.42,0.711,0.272
+mfe,mfe_af3_casp16_stage1,series_group,140,2,1.144,1.313,0.579,0.563,0.392,0.696,0.308
+deepdta,sequence_casp16,series_group,140,2,1.213,1.475,0.402,0.442,0.311,0.656,0.175
+llf,sequence_casp16,series_group,140,2,1.681,2.941,0.447,0.444,0.314,0.657,0.206
+mixingdta,sequence_casp16,series_group,140,2,1.029,1.129,0.514,0.529,0.373,0.687,0.29

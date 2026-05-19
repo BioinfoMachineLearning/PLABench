@@ -1,0 +1,10 @@
+Model,Key,Scope,N_total,N_series,RMSE,MSE,Pearson,Spearman,Kendall,CI,Rm2
+bapred,af3_chembl35_full,per_target,7650,84,1.277,1.765,0.149,0.128,0.089,0.544,0.041
+flowdock,af3_chembl35_full,per_target,7650,84,1.351,2.133,0.155,0.143,0.1,0.55,0.055
+boltz2,boltz2_chembl35_full,per_target,559,10,1.196,1.581,0.276,0.298,0.211,0.606,0.079
+flowr_root,flowr_root_af3_chembl35_full,per_target,7650,84,0.903,0.876,0.441,0.421,0.301,0.651,0.21
+haiping,haiping_af3_chembl35_full,per_target,7650,84,1.335,1.929,0.113,0.095,0.065,0.532,0.038
+mfe,mfe_af3_chembl35_full,per_target,7650,84,1.262,1.74,0.168,0.144,0.099,0.55,0.057
+deepdta,sequence_chembl35_full,per_target,7650,84,1.471,2.415,0.13,0.129,0.089,0.545,0.043
+llf,sequence_chembl35_full,per_target,7650,84,1.465,2.508,0.194,0.192,0.131,0.566,0.061
+mixingdta,sequence_chembl35_full,per_target,7650,84,1.287,1.815,0.145,0.135,0.094,0.547,0.056

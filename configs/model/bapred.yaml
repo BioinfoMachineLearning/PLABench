@@ -1,0 +1,12 @@
+
+name: bapred
+type: gnn
+model_path: forks/BA-Pred/bapred/weight/BAPred.pth
+# Note: BAPred uses hardcoded paths relative to its directory sometimes, need to be careful.
+# But run_inference.py shows model_path arg.
+
+# Source code directory for adding to sys.path
+models_source_dir: forks/BA-Pred
+
+output_dir: outputs/${model.name}/${dataset.name}/latest
+device: cuda

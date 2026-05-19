@@ -1,0 +1,14 @@
+data/
+outputs/
+tmp/
+casp17/
+logs/
+checkpoints/
+paper/
+agent.md
+casp17.md
+chembl35.md
+flowr_data.md
+.claude
+__pycache__/
+*.pyc

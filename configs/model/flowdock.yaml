@@ -1,0 +1,24 @@
+name: flowdock
+type: gnn
+
+# FlowDock source code directory (relative to project root)
+models_source_dir: forks/MULTICOM_ligand
+
+# FlowDock conda environment
+flowdock_env: /bmlfast/Lyuwei/miniconda3/envs/FlowDock/bin/python3
+
+# Model checkpoint (relative to models_source_dir)
+model_checkpoint: ./forks/FlowDock/checkpoints/esmfold_prior_paper_weights-EMA.ckpt
+
+# FlowDock execution directory (relative to models_source_dir)
+flowdock_exec_dir: forks/FlowDock
+
+# Sampling parameters
+n_samples: 1
+chunk_size: 1
+num_steps: 40
+sampler: VDODE
+cuda_device_index: 0
+
+output_dir: outputs/${model.name}/${dataset.name}/latest
+device: cuda

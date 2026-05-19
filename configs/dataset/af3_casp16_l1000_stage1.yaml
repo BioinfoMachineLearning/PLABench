@@ -1,0 +1,10 @@
+
+name: af3_casp16_l1000_stage1
+path: data/AF3_structures/L1000
+mode: stage1
+target_pattern: "L1*"
+ground_truth_path: data/casp16_data/labels/L1000_exper_affinity.csv
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+series_group: af3_casp16_stage1  # CASP16 L1000/L3000 pair for weighted aggregation

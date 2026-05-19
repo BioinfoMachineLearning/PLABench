@@ -1,0 +1,17 @@
+name: csar_hiq51_exp
+mode: csar_hiq51_exp
+
+# Path to the dataset root containing PDB directories (for structure)
+# {path}/{pdb_id}/{pdb_id}_protein.pdb and {pdb_id}/{pdb_id}_ligand.mol2
+path: ${hydra:runtime.cwd}/data/CSAR-HIQ_51
+
+# Path to experimental SDFs for SMILES extraction
+# {experimental_sdf_dir}/{pdb_id}/{pdb_id}_ligand.sdf (or ligand_clean.sdf)
+experimental_sdf_dir: ${hydra:runtime.cwd}/data/CSAR-HIQ_51
+
+# Ground truth file containing PDB IDs to process
+# Format: PDBID,Score ... (CSV)
+ground_truth_path: ${hydra:runtime.cwd}/data/CSAR-HIQ_51/index.txt
+
+# Dataset specific settings
+pocket_cutoff: 10.0

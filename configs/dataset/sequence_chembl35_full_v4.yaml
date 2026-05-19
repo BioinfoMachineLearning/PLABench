@@ -1,0 +1,16 @@
+# Sequence-based LLF inference on ChEMBL35, using the v4 model
+# (PDBbind2020 only, NEW SMILES standardization, EXACT v1 training hparams).
+# Control-variable test: tells us whether the new SMILES standardization
+# alone improves chembl35 over v1 when training data scope and recipe are
+# held identical.
+name: sequence_chembl35_full_v4
+path: data/chembl35/chembl35_full_input.csv
+mode: inference
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+ground_truth_format: csv
+multi_protein: true
+
+# v4 ckpt + max_seq_len overrides (consumed by llf_wrapper.py).
+task: pdbbind_v4
+model_path: forks/LLF/models/pdbbind_v4/best_model_full.pth
+max_seq_len: 1200    # strict v1 match

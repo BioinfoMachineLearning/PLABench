@@ -1,0 +1,8 @@
+# AF3 structure-based prediction on full ChEMBL35 (84 targets, 7660 pairs) (haiping)
+name: haiping_af3_chembl35_full
+path: data/AF3_structures/chembl35_full
+mode: cofold_stage1
+smiles_source_dir: data/AF3_structures/chembl35_full
+target_pattern: "*"
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+multi_protein: true  # skip pooled; split by compound_id prefix (UniProt_ID)

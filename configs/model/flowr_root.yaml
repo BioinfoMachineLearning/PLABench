@@ -1,0 +1,39 @@
+name: flowr_root
+type: flow_matching
+
+# flowr_root source code directory (relative to project root)
+flowr_root_dir: forks/flowr_root
+
+# flowr_root conda environment python
+flowr_root_env: /bmlfast/Lyuwei/miniconda3/envs/flowr_root/bin/python
+
+# Model checkpoint — copied to /dev/shm (RAM-backed) to avoid NFS contention
+# during multi-seed runs. Original on NFS: checkpoints/flowr_root_v2.1.ckpt
+ckpt_path: /dev/shm/flowr_root_v2.1.ckpt
+
+# High-quality recommended params (per scripts/predict_aff.sl)
+arch: pocket
+pocket_type: holo
+pocket_noise: fix
+cut_pocket: true
+pocket_cutoff: 7
+batch_cost: 20
+
+# 5-seed ensemble (paper §5.5 reports 5 seed runs for affinity benchmarks).
+# predict_aff.sl uses 4 seeds {2,42,512,1000}; we add 7777 to match the paper.
+seeds: [2, 42, 512, 1000, 7777]
+coord_noise_scale: 0.1
+
+# GPU index
+cuda_device_index: 1
+
+# Subprocess timeout (seconds) for a single seed run on one target
+per_seed_timeout: 900
+
+# Per-ligand aggregation over the four affinity heads (paper §5.4 / Fig 5).
+# We take median over the available heads; NaN/missing heads are dropped;
+# all-NaN counts as a seed failure. Cross-seed aggregation is also median.
+affinity_keys: [pic50, pki, pkd, pec50]
+
+output_dir: outputs/${model.name}/${dataset.name}/latest
+device: cuda

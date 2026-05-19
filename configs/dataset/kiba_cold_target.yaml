@@ -1,0 +1,13 @@
+name: kiba_cold_target
+path: data/Structure_independent/KIBA/cold/test_target.csv 
+test_file: data/Structure_independent/KIBA/cold/test_target.csv
+fold: 1
+task: cold_target
+label_column: label
+smiles_column: compound_iso_smiles
+sequence_column: target_sequence
+target_id_column: Target ID
+experiment_type: sequence
+problem_type: regression
+metric_type: correlation
+dataset_name: kiba_cold_target

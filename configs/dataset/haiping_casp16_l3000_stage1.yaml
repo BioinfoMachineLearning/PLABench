@@ -1,0 +1,10 @@
+name: haiping_casp16_l3000_stage1
+path: forks/haiping_methods/work3_VS_n_general_competation_gtrans_RG_cutoff0.8_redo
+mode: stage1
+# Stage 1 needs source SMILES to copy to sandbox if not present in input
+smiles_source_dir: data/casp16_data/smiles/L3000
+target_pattern: "L3*" 
+pocket_source: complex2_L3_poc.pdb
+# Expected output format (Affinity)
+ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
+series_group: haiping_casp16_stage1  # CASP16 L1000/L3000 pair for weighted aggregation

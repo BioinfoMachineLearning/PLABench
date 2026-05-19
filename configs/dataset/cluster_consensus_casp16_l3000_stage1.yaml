@@ -1,0 +1,10 @@
+
+name: cluster_consensus_casp16_l3000_stage1
+path: data/cofold_structures/cluster_consensus/L3000
+mode: stage1
+target_pattern: "L3*"
+ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+series_group: cluster_consensus_casp16_stage1  # CASP16 L1000/L3000 pair for weighted aggregation

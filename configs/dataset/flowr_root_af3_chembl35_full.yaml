@@ -1,0 +1,12 @@
+# FLOWR.root AF3 prediction on full ChEMBL35 (84 targets, 7650 compounds)
+# Uses CSV-batch mode (single Python process, model loaded once) — see
+# plabench/models/flowr_root/batch_inference.py for the rationale.
+name: flowr_root_af3_chembl35_full
+path: data/AF3_structures/chembl35_full
+mode: stage1
+target_pattern: "*"
+ground_truth_path: data/chembl35/chembl35_full_input.csv
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+multi_protein: true

@@ -1,0 +1,6 @@
+# Boltz2 affinity prediction on CASF-2016
+name: boltz2_casf2016
+standardized_csv: data/Structure_independent/CASF-2016_standardized_test.csv
+ground_truth_path: data/CASF-2016/power_scoring/CoreSet.dat
+ground_truth_format: casf_dat
+path: data/CASF-2016/coreset

@@ -1,0 +1,12 @@
+
+name: boltz2_casp16_l1000_stage1
+path: data/Boltz2_structures/L1000
+mode: stage1
+# Expected structure: Lxxxx_*/protein.pdb, Lxxxx_*/ligand.sdf
+target_pattern: "L1*" 
+ground_truth_path: data/casp16_data/labels/L1000_exper_affinity.csv
+# FlowDock fields (ignored by other models)
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+series_group: boltz2_casp16_stage1  # CASP16 L1000/L3000 pair for weighted aggregation
