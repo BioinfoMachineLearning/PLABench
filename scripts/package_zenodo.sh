@@ -6,7 +6,7 @@
 #     bash scripts/package_zenodo.sh --dry-run    # print the tree of every archive, write nothing
 #     bash scripts/package_zenodo.sh              # build the tarballs
 #
-# Every path inside an archive is repository-relative, so `tar xzf` at the repository
+# Every path inside an archive is repository-relative, so `tar xf` at the repository
 # root puts each file back where the benchmark expects it. Nothing is renamed on the
 # way in.
 #
@@ -145,7 +145,20 @@ pack() {  # pack <archive> <member>...
     echo "== $name  [$(du -shcL "${present[@]}" 2>/dev/null | tail -1 | cut -f1) uncompressed]"
     for m in "${present[@]}"; do show "$m"; done
     [ "$DRY" = 1 ] && return
-    tar -czhf "$OUT/$name" "${present[@]}"
+    compress_to "$OUT/$name" "${present[@]}"
+}
+
+# The archive name picks the compressor. Archives 01 and 02 are text, CSV and
+# PDB/SDF/MOL2, where xz's window catches redundancy across files that gzip's
+# 32 KB cannot: 93 MB becomes 12 and 636 MB becomes 283. Archive 03 is model
+# weights, near-random float32, where xz buys 8% for ten minutes of CPU and is
+# not worth the churn. tar reads either without being told which.
+compress_to() {
+    local out="$1"; shift
+    case "$out" in
+        *.tar.xz) XZ_OPT="-9 -T0" tar -cJhf "$out" "$@" ;;
+        *)        tar -czhf "$out" "$@" ;;
+    esac
 }
 
 [ "$DRY" = 1 ] || mkdir -p "$OUT"
@@ -155,7 +168,7 @@ pack() {  # pack <archive> <member>...
 # ---------------------------------------------------------------------------
 pdbbind_partition
 
-pack 01_benchmark_inputs.tar.gz \
+pack 01_benchmark_inputs.tar.xz \
     data/SOURCES.tsv \
     "$SPLIT_CSV" \
     data/Structure_independent/DAVIS/*.csv \
@@ -217,7 +230,7 @@ No AlphaFold 3 model parameters are included here or anywhere in PLABench.
 Request those from Google DeepMind directly: https://forms.gle/svvpY4u2jsHEwWYS6
 EOF
 
-pack 02_af3_structures.tar.gz \
+pack 02_af3_structures.tar.xz \
     "$AF3_NOTICE" \
     data/AF3_structures/chembl35_full \
     data/AF3_structures/chembl35_multimer \
@@ -287,13 +300,13 @@ limits of deep learning for protein-ligand binding affinity prediction".
 Code, and the instructions for using any of this, are at
 https://github.com/BioinfoMachineLearning/PLABench
 
-  01_benchmark_inputs.tar.gz        Split partitions, the filtered and full
+  01_benchmark_inputs.tar.xz        Split partitions, the filtered and full
                                     ChEMBL35 sets with their removal ledger, the
                                     CASP16 labels, SMILES and stage-1 inputs, the
                                     standardized CASF and CSAR-HiQ affinity
                                     tables, every Davis and KIBA fold, and
                                     SOURCES.tsv
-  02_af3_structures.tar.gz          The predicted structures the benchmark
+  02_af3_structures.tar.xz          The predicted structures the benchmark
                                     scored: AlphaFold 3 for ChEMBL35 and CASP16,
                                     Boltz-2 for CASP16, CASF and CSAR-HiQ, plus
                                     the template-guided CASP16 rung
@@ -306,7 +319,7 @@ Every path inside is relative to the repository root, so unpack from there:
 
     git clone --recurse-submodules https://github.com/BioinfoMachineLearning/PLABench.git
     cd PLABench
-    for f in /path/to/0*.tar.gz; do tar xzf "$f"; done
+    for f in /path/to/0*.tar.*; do tar xf "$f"; done
     sha256sum -c /path/to/SHA256SUMS.txt   # run from the directory holding the tarballs
 
 DAVIS AND KIBA
@@ -372,7 +385,7 @@ require. Third-party checkpoints keep the terms of their own releases, recorded
 per file in checkpoints/THIRD_PARTY.tsv. The code is MIT.
 EOF
 
-( cd "$OUT" && sha256sum ./*.tar.gz > SHA256SUMS.txt )
+( cd "$OUT" && sha256sum ./*.tar.gz ./*.tar.xz 2>/dev/null | sort -k2 > SHA256SUMS.txt )
 
 echo
 ls -lh "$OUT"

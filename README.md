@@ -127,8 +127,8 @@ fetches and verifies them. Boltz-2 is the exception: it downloads itself into
 Benchmark inputs, ground truth and the AlphaFold3 structures are too large for
 git and live on Zenodo instead, at
 [doi:10.5281/zenodo.22716174](https://doi.org/10.5281/zenodo.22716174). Four
-archives, about 6 GB, unpacking over `data/`, `checkpoints/`, `outputs/` and
-`results/`:
+archives, 1.8 GB to download and 6.3 GB unpacked, over `data/`, `checkpoints/`,
+`outputs/` and `results/`:
 
 | Archive | Holds |
 | --- | --- |
