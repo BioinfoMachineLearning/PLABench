@@ -168,8 +168,13 @@ pack 01_benchmark_inputs.tar.gz \
     data/Structure_independent/KIBA/cold/*.pkl \
     data/Structure_independent/L1000_casp16_test.csv \
     data/Structure_independent/L3000_casp16_test.csv \
+    data/Structure_independent/CASF-2013_standardized_test.csv \
+    data/Structure_independent/CASF-2016_standardized_test.csv \
     data/Structure_independent/CSAR-HIQ_36_standardized_test.csv \
     data/Structure_independent/CSAR-HIQ_51_standardized_test.csv \
+    data/casp16_data/labels \
+    data/casp16_data/smiles \
+    data/casp16_data/stage1_input \
     data/chembl35/chembl35_filtered_input.csv \
     data/chembl35/chembl35_full_input.csv \
     data/chembl35/chembl35_filter_ledger.csv \
@@ -178,11 +183,17 @@ pack 01_benchmark_inputs.tar.gz \
     data/chembl35/Data_S1_target_aaseq.csv
 
 # ---------------------------------------------------------------------------
-# (2) structural models: the AlphaFold3 inputs the benchmark actually scored.
-# chembl35_full is the monomer arm, chembl35_multimer the chain-count comparison.
-# The other AF3_structures/ subdirectories are superseded or exploratory passes.
-# The Model Parameters Terms of Use permit distributing Output and require clear
-# notice of any modification, which is what the NOTICE file is for.
+# (2) the predicted input structures the benchmark scored, from both folding
+# tools. chembl35_full is the AF3 monomer arm, chembl35_multimer the chain-count
+# comparison. The other AF3_structures/ subdirectories are superseded or
+# exploratory passes. The Boltz2_ directories are the lower rungs of the pose
+# ladder behind Figure 3, PLABench-generated like everything else here; the
+# tplpocket set is the template-guided rung. Their CASF and CSAR halves are ours
+# to publish, but the matching experimental complexes are not (see below), so
+# those configs still need the corpus fetched from its licensor.
+#
+# The AF3 Model Parameters Terms of Use permit distributing Output and require
+# clear notice of any modification, which is what the NOTICE file is for.
 # ---------------------------------------------------------------------------
 cat > "$AF3_NOTICE" <<'EOF'
 The structures in this archive are AlphaFold 3 Output, predicted with AlphaFold 3
@@ -211,7 +222,14 @@ pack 02_af3_structures.tar.gz \
     data/AF3_structures/chembl35_full \
     data/AF3_structures/chembl35_multimer \
     data/AF3_structures/L1000 \
-    data/AF3_structures/L3000
+    data/AF3_structures/L3000 \
+    data/Boltz2_structures/L1000 \
+    data/Boltz2_structures/L3000 \
+    data/Boltz2_structures/casf2013 \
+    data/Boltz2_structures/casf2016 \
+    data/Boltz2_structures/csar36 \
+    data/Boltz2_structures/csar51 \
+    data/Boltz2_tplpocket_structures/L3000
 
 # ---------------------------------------------------------------------------
 # (3) retrained checkpoints. checkpoints/structure holds third-party weights that
@@ -271,9 +289,14 @@ https://github.com/BioinfoMachineLearning/PLABench
 
   01_benchmark_inputs.tar.gz        Split partitions, the filtered and full
                                     ChEMBL35 sets with their removal ledger, the
-                                    CASP16 targets in pKd, every Davis and KIBA
-                                    fold, and SOURCES.tsv
-  02_af3_structures.tar.gz          AlphaFold 3 structures for ChEMBL35 and CASP16
+                                    CASP16 labels, SMILES and stage-1 inputs, the
+                                    standardized CASF and CSAR-HiQ affinity
+                                    tables, every Davis and KIBA fold, and
+                                    SOURCES.tsv
+  02_af3_structures.tar.gz          The predicted structures the benchmark
+                                    scored: AlphaFold 3 for ChEMBL35 and CASP16,
+                                    Boltz-2 for CASP16, CASF and CSAR-HiQ, plus
+                                    the template-guided CASP16 rung
   03_checkpoints.tar.gz             The weights PLABench trained, plus the
                                     third-party weight inventory
   04_predictions_and_metrics.tar.gz Every per-model prediction, the leakage
@@ -312,6 +335,32 @@ and two cases change what you get:
   and 51 structure sets are NOT here. Their standardized PDB-code / SMILES / pKd
   tables are, which is enough to rescore once you have the complexes. Fetch the
   87 entries from https://www.rcsb.org/ by PDB code.
+
+  CASF-2013 and CASF-2016 come from the CASF authors under their own terms, so
+  the core sets are not here either. Request them at
+  http://www.pdbbind.org.cn/casf.php. The Boltz-2 poses for both, and the
+  standardized affinity tables, are in archives 02 and 01.
+
+  The experimental CASP16 stage-2 complexes are the organizers' release, not
+  ours, so data/casp16_data/stage2_input is not here. Nothing in the paper needs
+  it: the CASP16 metrics are scored from the labels in archive 01, and
+  configs/manifests/ in the repository records which targets each stage-2 run
+  covered, so scripts/collect_results.py reports the same 93 of 93 without it.
+  The five stage-2 configs themselves cannot be re-run until you have the
+  complexes from https://predictioncenter.org/casp16/.
+
+  The CASP16 stage-1 submissions of the other predictor groups
+  (data/casp16_data/official_submissions) are the Prediction Center's to
+  publish and no script here reads them. They are at the same URL.
+
+  The eight data/*_prepared directories hold no bytes of their own. MFE wants
+  one directory per complex with protein.pdb and ligand.mol2 inside, so they are
+  2,214 symlinks into CASF, CSAR-HiQ and the Boltz-2 poses. Rebuild them once
+  the corpora are in place:
+
+      python scripts/data_prep/link_mfe_inputs.py
+
+  The four Boltz-2 ones need only archive 02 and work straight after unpacking.
 
 LICENSES
 

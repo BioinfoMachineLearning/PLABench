@@ -1,0 +1,33 @@
+name: plabench-analysis
+# The environment for everything under scripts/: the results collector, the
+# table and figure generators, and the leakage audits. It runs no model, so
+# unlike the other nine files here it is not a `conda env export` of a
+# benchmark run. It is a hand-written minimum, pinned to the versions the
+# published tables and figures were produced with.
+#
+#   conda env create -f environments/analysis.yaml
+#   conda activate plabench-analysis
+#   python scripts/collect_results.py
+#
+# torch is here only for the two leakage scripts that compute Tanimoto
+# similarity on the GPU (scripts/leakage/chembl35_leakage_std_recheck.py and
+# scripts/leakage/casp16_ligand_leakage.py). They fall back to the CPU if no
+# GPU is visible, which is slower but gives the same numbers. The PyPI
+# torch 2.1.2 wheel is the CUDA 12.1 build, so no extra index is needed.
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8.20
+  - pip=24.2
+  - pip:
+      - matplotlib==3.7.3
+      - numpy==1.24.4
+      - pandas==2.0.3
+      - pyyaml==6.0.3
+      - rdkit==2022.9.5
+      - scikit-learn==1.3.2
+      - scipy==1.10.1
+      - seaborn==0.13.2
+      # pandas.to_markdown, which collect_results.py prints its scan through
+      - tabulate==0.9.0
+      - torch==2.1.2

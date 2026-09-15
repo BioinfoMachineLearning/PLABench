@@ -8,13 +8,16 @@ n_targets and n_compounds appear as compact text in the y-axis row labels
 Columns are split into three groups with black vertical separators:
   Structure-based  |  Structure-independent  |  Ensemble
 
-Output: results/figures/per_class_pearson_heatmap.pdf (vector, paper figure)
-
 Usage:
-    python scripts/figures/plot_per_class_heatmap.py                # published 7,650-ligand arm
-    python scripts/figures/plot_per_class_heatmap.py filtered       # leakage-filtered 4,862 arm
+    python scripts/figures/plot_per_class_heatmap.py            # Figure 4, leakage-filtered arm
+    python scripts/figures/plot_per_class_heatmap.py full       # unfiltered arm, not in the paper
+
 The argument is the suffix of results/chembl35/per_class_pearson_wide_chembl35_casp16_<arm>.csv,
-so the two arms are drawn by the same code and cannot drift apart in style.
+written by scripts/leakage/eval_chembl35_filtered.py, so the two arms are drawn by
+the same code and cannot drift apart in style. Figure 4 of the manuscript is the
+filtered arm, which is why that is the default.
+
+Output: results/figures/per_class_pearson_heatmap_<arm>.pdf (vector) and .png
 """
 import sys
 
@@ -30,11 +33,12 @@ FONTS = ["Arial", "Liberation Sans", "Helvetica", "DejaVu Sans"]
 mpl.rcParams["font.sans-serif"] = FONTS
 mpl.rcParams["pdf.fonttype"] = 42  # embed TrueType rather than rasterise to Type 3
 
-ARM = sys.argv[1] if len(sys.argv) > 1 else None
-CSV = ("results/chembl35/per_class_pearson_wide_chembl35_casp16.csv" if ARM is None
-       else f"results/chembl35/per_class_pearson_wide_chembl35_casp16_{ARM}.csv")
-OUT_PDF = ("results/figures/per_class_pearson_heatmap.pdf" if ARM is None
-           else f"results/figures/per_class_pearson_heatmap_{ARM}.pdf")
+ARMS = ("filtered", "full")
+ARM = sys.argv[1] if len(sys.argv) > 1 else "filtered"
+if ARM not in ARMS:
+    sys.exit(f"Unknown arm {ARM!r}. Choose one of: {', '.join(ARMS)}")
+CSV = f"results/chembl35/per_class_pearson_wide_chembl35_casp16_{ARM}.csv"
+OUT_PDF = f"results/figures/per_class_pearson_heatmap_{ARM}.pdf"
 
 # Column groups + their order
 STRUCTURE_BASED = ["Boltz2", "FlowDock", "FLOWR.ROOT", "Graph_RG",

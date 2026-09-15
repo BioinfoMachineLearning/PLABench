@@ -19,8 +19,14 @@ else is grouped by what it does. Superseded and exploratory scripts are kept in
 | `data_prep/` | Structure conversion for the released inputs |
 | `chain_ablation/` | The longest-chain versus concatenation study |
 
-Run everything from the repository root: paths inside the scripts are relative to
-it.
+Run everything from the repository root, in the analysis environment: paths
+inside the scripts are relative to the root, and nothing here runs a model, so
+none of the nine model environments is needed.
+
+```bash
+conda env create -f environments/analysis.yaml
+conda activate plabench-analysis
+```
 
 ## `collect_results.py` and `weighted_summary.py`
 
@@ -35,6 +41,15 @@ four, so run these two first, in that order.
 `configs/model/<model>.yaml` and `configs/dataset/<dataset>.yaml` exist, and
 applies the same test to the rows it would otherwise carry over from the
 previous file. Archiving a config is therefore enough to retire its results.
+
+Coverage is `N / expected`, and `expected` is not simply the size of the ground
+truth. A dataset is scored on the targets that had a model input, which for the
+CASP16 stage-2 sets is 93 of the 123 rows in the L3000 label file. The collector
+narrows the denominator against the input directory and writes the surviving IDs
+to `configs/manifests/<dataset>.txt`. Those manifests are in git, so a checkout
+whose `data/` does not carry the stage-2 complexes still reports 93 of 93 rather
+than 93 of 123. If neither the directory nor a manifest is there, it falls back
+to the full ground truth and says so.
 
 ## `package_zenodo.sh`
 
@@ -111,18 +126,17 @@ are independent of the ChEMBL35 ones apart from the shared similarity code.
 | `casp16_stage1_kendall.py` | `results/casp16/casp16_stage1_kendall.csv`: per-series Kendall's tau plus the N-weighted average, the input to the CASP16 figure |
 | `emit_table4.py` | `results/tables/table4_{full,filtered}[_with_ensemble].tex`: the ChEMBL35 summary tables |
 | `per_class_summary.py` | `results/chembl35/per_class_summary_chembl35.csv` |
-| `per_class_pearson_wide_with_casp16.py` | `results/chembl35/per_class_pearson_wide_chembl35_casp16.csv`, the only input to the heatmap |
 
 ## `figures/`
 
 | Script | Produces |
 | --- | --- |
-| `plot_per_class_heatmap.py` | `results/figures/per_class_pearson_heatmap[_filtered].pdf`: the protein-family heatmap |
+| `plot_per_class_heatmap.py` | `results/figures/per_class_pearson_heatmap_filtered.pdf`: Figure 4, the protein-family heatmap. Pass `full` for the unfiltered arm |
 | `plot_casp16_kendall.py` | `results/figures/casp16_kendall.pdf`: the CASP16 ranking figure |
 | `plot_ladder_panels.py` | `results/figures/fig_ladder_panels.pdf`: the four-rung pose-quality ladder and its interaction panel |
 
-The heatmap needs `tables/per_class_summary.py` and then
-`tables/per_class_pearson_wide_with_casp16.py` first. The other two are
+The heatmap reads `results/chembl35/per_class_pearson_wide_chembl35_casp16_<arm>.csv`,
+so run `leakage/eval_chembl35_filtered.py` first. The other two figures are
 independent.
 
 ## `data_prep/`
@@ -131,6 +145,8 @@ independent.
 | --- | --- |
 | `gen_cofold_structures.py` | Converts AlphaFold3 CIF output into the released `protein.pdb` / `ligand.sdf` / `ligand.mol2` triples |
 | `gen_boltz2_ligand_mol2.py` | Extracts Boltz-2 ligand MOL2 files, the first rung of the pose ladder |
+| `link_mfe_inputs.py` | Rebuilds the eight `data/*_prepared` symlink farms MFE reads on CASF and CSAR-HiQ. Run it after unpacking the deposit; `--check` reports without writing |
+| `sync_casp16_sequence_affinity.py` | Rewrites the `affinity` column of `data/Structure_independent/L{1000,3000}_casp16_test.csv` from the CASP16 labels at the 300 K constant. Idempotent, and it moves no published number: the collector converts the labels itself |
 | `rescue_af3_conversion_failures.py` | Recovers AlphaFold3 cases whose top-ranked sample will not convert, by sweeping all ten samples in `pair_iptm` order under three conversion strategies. It produced 11 of the released ChEMBL35 ligand structures; pass `--keep_sdf_dir` to write them |
 
 ## Machine-specific paths

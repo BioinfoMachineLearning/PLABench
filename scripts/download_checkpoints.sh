@@ -7,9 +7,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
 CHECKPOINT_DIR="${REPO_ROOT}/checkpoints"
-ARCHIVE_NAME="${PLABENCH_CHECKPOINT_ARCHIVE_NAME:-plabench-checkpoints.tar.gz}"
-ARCHIVE_URL="${PLABENCH_CHECKPOINT_URL:-https://zenodo.org/records/REPLACE_WITH_RECORD_ID/files/${ARCHIVE_NAME}?download=1}"
-ARCHIVE_SHA256="${PLABENCH_CHECKPOINT_SHA256:-}"
+# Archive 3 of the Zenodo deposit, doi:10.5281/zenodo.22716174. Override any of
+# the three to install from a local copy or a mirror; PLABENCH_CHECKPOINT_SHA256=""
+# turns the checksum test off.
+ARCHIVE_NAME="${PLABENCH_CHECKPOINT_ARCHIVE_NAME:-03_checkpoints.tar.gz}"
+ARCHIVE_URL="${PLABENCH_CHECKPOINT_URL:-https://zenodo.org/records/22716174/files/${ARCHIVE_NAME}?download=1}"
+ARCHIVE_SHA256="${PLABENCH_CHECKPOINT_SHA256-f1802f64a23375671bfa7980401acdb094465049fb178755e0bb965c42cf310a}"
 FORCE=0
 CHECK_ONLY=0
 LINKS_ONLY=0
@@ -24,11 +27,6 @@ for arg in "$@"; do
         *) printf 'Unknown argument: %s\n' "$arg" >&2; usage >&2; exit 2 ;;
     esac
 done
-
-if [[ "${LINKS_ONLY}" -eq 0 && "${ARCHIVE_URL}" == *REPLACE_WITH_RECORD_ID* ]]; then
-    printf 'Checkpoint URL is not configured. Set PLABENCH_CHECKPOINT_URL to the Zenodo file URL.\n' >&2
-    exit 2
-fi
 
 mkdir -p "${CHECKPOINT_DIR}/.download"
 archive_path="${CHECKPOINT_DIR}/.download/${ARCHIVE_NAME}"

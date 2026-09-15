@@ -27,7 +27,9 @@ Install, from the repository root:
    its official source and verifies the SHA256 (needs `gdown` for the Google
    Drive items and `HF_TOKEN` for the gated ESM3 weight; Boltz-2 fetches its
    own weights on first use).
-2. Set `PLABENCH_CHECKPOINT_URL` to the published Zenodo file URL and run
-   `bash scripts/download_checkpoints.sh` for the PLABench-trained weights.
-   It also recreates the fork links (`--links-only` re-links without touching
-   the archive).
+2. `bash scripts/download_checkpoints.sh` fetches the PLABench-trained weights
+   from archive 3 of the Zenodo deposit and verifies the SHA256. Both are baked
+   into the script, so it takes no arguments; `PLABENCH_CHECKPOINT_URL` points
+   it at a local copy or a mirror instead, and `PLABENCH_CHECKPOINT_SHA256=""`
+   skips the checksum test. It also recreates the fork links (`--links-only`
+   re-links without touching the archive).

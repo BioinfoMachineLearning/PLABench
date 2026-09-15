@@ -49,6 +49,12 @@ dependencies:
   - xz=5.6.4
   - zlib=1.2.13
   - pip:
+      # torch, torchvision, torchaudio and DGL are built per CUDA version and
+      # are not on PyPI in their +cu124 form. `conda env export` keeps the local
+      # version label it sees but cannot record the index the wheel came from,
+      # so without these two lines pip cannot resolve them.
+      - --extra-index-url https://download.pytorch.org/whl/cu124
+      - --find-links https://data.dgl.ai/wheels/torch-2.4/cu124/repo.html
       - annotated-types==0.7.0
       - antlr4-python3-runtime==4.9.3
       - certifi==2025.8.3

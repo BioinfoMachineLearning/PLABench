@@ -106,10 +106,12 @@ at yours.
 ## Checkpoints
 
 The weights PLABench trained itself (DeepDTA, LLF and MixingDTA on PDBbind,
-MixingDTA's Davis and KIBA cold-start folds, and MFE) ship in one Zenodo
-archive. Set `PLABENCH_CHECKPOINT_URL` to the published Zenodo file URL and run
-`bash scripts/download_checkpoints.sh`. The benchmark also attempts this by
-itself when a configured checkpoint is missing.
+MixingDTA's Davis and KIBA cold-start folds, and MFE) ship in archive 3 of the
+Zenodo deposit. `bash scripts/download_checkpoints.sh` fetches it from there and
+checks the SHA256; both are baked into the script, so it takes no arguments. The
+benchmark also attempts this by itself when a configured checkpoint is missing.
+To install from a local copy or a mirror instead, set `PLABENCH_CHECKPOINT_URL`,
+and `PLABENCH_CHECKPOINT_SHA256=""` to skip the checksum test.
 
 Third-party weights are never re-uploaded. That covers Boltz-2, FLOWR.ROOT,
 FlowDock, BA-Pred, Graph_RG/Haiping, ESM3, and the MixingDTA authors' Davis and
@@ -130,15 +132,21 @@ archives, about 6 GB, unpacking over `data/`, `checkpoints/`, `outputs/` and
 
 | Archive | Holds |
 | --- | --- |
-| `01_benchmark_inputs` | Split partitions, the filtered and full ChEMBL35 sets with their removal ledger, the CASP16 targets in pKd, and `SOURCES.tsv` |
-| `02_af3_structures` | The AlphaFold3 structures for ChEMBL35 and CASP16 |
+| `01_benchmark_inputs` | Split partitions, the filtered and full ChEMBL35 sets with their removal ledger, the CASP16 labels, SMILES and stage-1 inputs, the standardized CASF and CSAR-HiQ affinity tables, every Davis and KIBA fold, and `SOURCES.tsv` |
+| `02_af3_structures` | The predicted structures the benchmark scored: AlphaFold3 for ChEMBL35 and CASP16, Boltz-2 for CASP16, CASF and CSAR-HiQ, plus the template-guided CASP16 rung |
 | `03_checkpoints` | The weights PLABench trained, and the third-party inventory |
 | `04_predictions_and_metrics` | Every per-model prediction, the leakage tables and the scored metrics |
 
+Unpack archives 1, 2 and 4, and 46 of the 68 dataset configs run as they are.
+The other 22 wait on a corpus nobody may redistribute: the CASF core sets, the
+CSAR-HiQ structures, or the CASP16 stage-2 complexes. Each is a registration or
+a download away, and the bullets below say where.
+
 What ships is decided by who made it: PLABench artifacts go in, corpora other
 people built are linked instead. `checkpoints/` splits the same way, between
-`MANIFEST.tsv` and `THIRD_PARTY.tsv`. `data/SOURCES.tsv` gives the call and the
-license for every path under `data/`. Two of those calls change what you get:
+`MANIFEST.tsv` and `THIRD_PARTY.tsv`. `data/SOURCES.tsv` gives the call, the
+origin and the license for every path the benchmark reads, 25 of them. Four of
+those calls change what you get:
 
 - PDBbind v2020 forbids redistribution without written permission, so the
   deposit carries the 4,465 / 497 refined partition as `compound_id,split` and
@@ -152,6 +160,28 @@ license for every path under `data/`. Two of those calls change what you get:
   CSAR-NRC HiQ set and its update, but Binding MOAD is sunset and static now, so
   fetching the 87 entries from the [RCSB](https://www.rcsb.org/) by PDB code is
   the safer route.
+- CASF-2013 and CASF-2016 come from the CASF authors under their own terms, so
+  the two core sets are not shipped either. Request them at
+  [pdbbind.org.cn/casf.php](http://www.pdbbind.org.cn/casf.php). The Boltz-2
+  poses for both are in archive 2 and the standardized affinity tables in
+  archive 1, so only the experimental arms wait on the request.
+- The experimental CASP16 stage-2 complexes are the organizers' release. No
+  number in the paper needs them: CASP16 is scored against the labels in archive
+  1, and `configs/manifests/` records which targets each stage-2 run covered, so
+  `scripts/collect_results.py` still reports 93 of 93 with `data/` half empty.
+  Re-running the six stage-2 configs does need them, from the
+  [Prediction Center](https://predictioncenter.org/casp16/).
+
+MFE reads its structures as one directory per complex holding `protein.pdb` and
+`ligand.mol2`. Those eight `data/*_prepared` directories are symlink farms with
+no bytes of their own, so they are not deposited. Rebuild them after unpacking:
+
+```bash
+python scripts/data_prep/link_mfe_inputs.py
+```
+
+The four that point at Boltz-2 poses work straight from archive 2; the other
+four wait on CASF and CSAR-HiQ.
 
 Davis and KIBA are complete: train, validation and test, for the warm-start arm
 and for both cold-start arms. Everything except the test folds is in the pickle
@@ -191,7 +221,8 @@ which is which, so read `configs/README.md` before picking one; the ordering of
 tokens in a name is easy to misread. Runs that did not make the paper are in
 `archive/configs/dataset/`.
 
-Predictions land in `outputs/<model>/<dataset>/latest/`. Score them with
+Predictions land in `outputs/<model>/<dataset>/latest/`. Score them from the
+analysis environment (`environments/analysis.yaml`, see below) with
 `python scripts/collect_results.py`, which refreshes
 `results/benchmark_summary.csv` and the per-target tables, then
 `python scripts/weighted_summary.py` for the weighted aggregates.
@@ -234,6 +265,16 @@ Every model has its own conda environment, exported to `environments/`. Create
 one with `conda env create -f environments/<model>.yaml`;
 `environments/README.md` covers the two post-create steps a conda export cannot
 carry, and how AlphaFold3 was built.
+
+The analysis scripts get a tenth environment of their own, `analysis.yaml`. It
+runs no model, so it installs in a couple of minutes, and it is what everything
+under `scripts/` was run in:
+
+```bash
+conda env create -f environments/analysis.yaml
+conda activate plabench-analysis
+python scripts/collect_results.py
+```
 
 Five models are spawned as a subprocess, so they take a path. Override it with
 an environment variable rather than editing `configs/model/*.yaml`:

@@ -1,0 +1,19 @@
+# Target IDs experimental_casp16_l1000_stage2 was scored on, written by scripts/collect_results.py
+# from the input directory. Read back when that directory is not on disk.
+L1001
+L1002
+L1003
+L1004
+L1005
+L1006
+L1007
+L1008
+L1009
+L1010
+L1011
+L1012
+L1013
+L1014
+L1015
+L1016
+L1017

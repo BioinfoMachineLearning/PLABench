@@ -46,6 +46,92 @@ def is_release_run(model_name, dataset_name):
             and os.path.exists(os.path.join(DATASET_CONFIG_DIR, f"{dataset_name}.yaml")))
 
 
+# Beside the dataset configs rather than under data/, because the point of a
+# manifest is to still be there when data/ has not been unpacked.
+MANIFEST_DIR = os.path.join("configs", "manifests")
+
+
+def _read_manifest(dataset_name):
+    path = os.path.join(MANIFEST_DIR, f"{dataset_name}.txt")
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        ids = {line.strip() for line in f if line.strip() and not line.startswith("#")}
+    return ids or None
+
+
+def _write_manifest(dataset_name, ids):
+    os.makedirs(MANIFEST_DIR, exist_ok=True)
+    with open(os.path.join(MANIFEST_DIR, f"{dataset_name}.txt"), "w") as f:
+        f.write(f"# Target IDs {dataset_name} was scored on, written by scripts/collect_results.py\n")
+        f.write("# from the input directory. Read back when that directory is not on disk.\n")
+        for target_id in sorted(ids):
+            f.write(f"{target_id}\n")
+
+
+def resolve_expected(dataset_name, gt_ids, list_inputs):
+    """Narrow a ground-truth ID set to the targets that had model inputs.
+
+    Several datasets score fewer targets than their ground truth holds, because
+    only some targets have a structure. `list_inputs` recovers that set from the
+    input directory and returns None when the directory is not there.
+
+    The structure directories are the bulk of the Zenodo deposit and nobody
+    reproducing the tables alone will unpack them, so the resolved set is also
+    committed under data/manifests/. Without it the denominator falls back to the
+    full ground truth, and the CASP16 stage 2 rows report 93 predictions out of
+    123 targets at 75.6% coverage instead of 93 out of 93 at 100%, with every
+    metric unchanged. The manifest is refreshed whenever the directory is present,
+    so the two cannot drift apart.
+    """
+    listed = list_inputs()
+    if listed:
+        narrowed = gt_ids & listed
+        if narrowed:
+            _write_manifest(dataset_name, narrowed)
+            return narrowed
+        logging.warning(f"{dataset_name}: no input matched a ground-truth ID; using the full ground truth.")
+        return gt_ids
+
+    stored = _read_manifest(dataset_name)
+    if stored:
+        narrowed = gt_ids & stored
+        if narrowed:
+            return narrowed
+
+    logging.warning(f"{dataset_name}: no input directory and no manifest in {MANIFEST_DIR}; "
+                    "using the full ground truth as the denominator.")
+    return gt_ids
+
+
+def _subdirs_with(input_dir, suffix=None):
+    """Subdirectory names of `input_dir`, or None when it is not on disk.
+
+    With `suffix`, keep only subdirectories holding a `<name><suffix>` file.
+    """
+    if not input_dir or not os.path.isdir(input_dir):
+        return None
+    return {d for d in os.listdir(input_dir)
+            if os.path.isdir(os.path.join(input_dir, d))
+            and (suffix is None or os.path.exists(os.path.join(input_dir, d, f"{d}{suffix}")))}
+
+
+def _protein_pdb_stems(input_dir, last_segment=False):
+    """`<id>_protein.pdb` stems in a flat directory, or None when it is not on disk.
+
+    `last_segment` keeps only the part after the final underscore, for the
+    Boltz-2 CSAR directories whose files carry a set prefix.
+    """
+    if not input_dir or not os.path.isdir(input_dir):
+        return None
+    stems = set()
+    for fn in os.listdir(input_dir):
+        if fn.endswith("_protein.pdb"):
+            stem = fn[: -len("_protein.pdb")]
+            stems.add(stem.split("_")[-1] if last_segment else stem)
+    return stems
+
+
 def collect_results(outputs_dir="outputs"):
     os.makedirs("results", exist_ok=True)
     # Find all predictions.csv under any model directory
@@ -184,26 +270,16 @@ def collect_results(outputs_dir="outputs"):
             if model_name == "boltz2":
                 pass  # keep expected_total = len(gt_df)
             elif "stage2" in dataset_name.lower():
-                # Locate input directory
                 # data/casp16_data/stage2_input/L3000_prepared/Lxxxx/
                 if "l3000" in dataset_name.lower():
                     input_dir = os.path.join("data", "casp16_data", "stage2_input", "L3000_prepared")
                 elif "l1000" in dataset_name.lower():
                     input_dir = os.path.join("data", "casp16_data", "stage2_input", "L1000_prepared")
                 else:
-                     input_dir = None
-
-                if input_dir and os.path.exists(input_dir):
-                    input_targets = [d for d in os.listdir(input_dir) if os.path.isdir(os.path.join(input_dir, d))]
-                    input_targets_set = set(input_targets)
-                    expected_gt_ids = expected_gt_ids.intersection(input_targets_set)
-                    expected_total = len(expected_gt_ids)
-                    if expected_total == 0:
-                        logging.warning(f"Stage 2 input check found 0 matching targets in {input_dir}. Using full GT list.")
-                        expected_gt_ids = set(gt_df[gt_id_col].astype(str))
-                        expected_total = len(gt_df)
-                else:
-                    logging.warning(f"Could not verify stage 2 inputs at {input_dir}, assuming full GT.")
+                    input_dir = None
+                expected_gt_ids = resolve_expected(
+                    dataset_name, expected_gt_ids, lambda: _subdirs_with(input_dir))
+                expected_total = len(expected_gt_ids)
 
             elif "casf2013" in dataset_name.lower() or "casf2016" in dataset_name.lower():
                 # Total based on available inputs, not GT
@@ -211,48 +287,39 @@ def collect_results(outputs_dir="outputs"):
                 if "exp" in dataset_name.lower():
                     # Experimental: coreset subdirectories contain {pdb_id}_protein.pdb
                     input_dir = os.path.join("data", f"CASF-{year}", "coreset")
-                    if os.path.exists(input_dir):
-                        available = {d for d in os.listdir(input_dir)
-                                     if os.path.isdir(os.path.join(input_dir, d))
-                                     and os.path.exists(os.path.join(input_dir, d, f"{d}_protein.pdb"))}
-                        expected_gt_ids = expected_gt_ids.intersection(available)
-                        expected_total = len(expected_gt_ids)
+                    expected_gt_ids = resolve_expected(
+                        dataset_name, expected_gt_ids,
+                        lambda: _subdirs_with(input_dir, "_protein.pdb"))
+                    expected_total = len(expected_gt_ids)
                 elif "sequence" in dataset_name.lower() or "deepdta" in dataset_name.lower():
                      # Sequence models use full GT (no structural filtering)
                      expected_total = len(gt_df)
                 else:
                     # Boltz2: flat directory with {pdb_id}_protein.pdb
                     input_dir = os.path.join("data", "Boltz2_structures", f"casf{year}")
-                    if os.path.exists(input_dir):
-                        available = {f.replace("_protein.pdb", "") for f in os.listdir(input_dir) if f.endswith("_protein.pdb")}
-                        expected_gt_ids = expected_gt_ids.intersection(available)
-                        expected_total = len(expected_gt_ids)
+                    expected_gt_ids = resolve_expected(
+                        dataset_name, expected_gt_ids,
+                        lambda: _protein_pdb_stems(input_dir))
+                    expected_total = len(expected_gt_ids)
 
             elif "csar_hiq51" in dataset_name.lower() or "csar_hiq36" in dataset_name.lower():
                 hiq = "hiq51" if "hiq51" in dataset_name.lower() else "hiq36"
                 if "boltz2" in dataset_name.lower():
-                    # Boltz2: flat or prefixed naming
+                    # Boltz2: flat or prefixed naming, so keep the last segment
                     boltz_dir = "csar51" if hiq == "hiq51" else "csar36"
                     input_dir = os.path.join("data", "Boltz2_structures", boltz_dir)
-                    if os.path.exists(input_dir):
-                        available = set()
-                        for fn in os.listdir(input_dir):
-                            if fn.endswith("_protein.pdb"):
-                                # Extract PDB ID: last segment before _protein.pdb
-                                pdb_id = fn.replace("_protein.pdb", "").split("_")[-1]
-                                available.add(pdb_id)
-                        expected_gt_ids = expected_gt_ids.intersection(available)
-                        expected_total = len(expected_gt_ids)
+                    expected_gt_ids = resolve_expected(
+                        dataset_name, expected_gt_ids,
+                        lambda: _protein_pdb_stems(input_dir, last_segment=True))
+                    expected_total = len(expected_gt_ids)
                 else:
                     # Exp: nested directories with {pdb_id}/{pdb_id}_protein.pdb
                     data_dir_name = "CSAR-HIQ_51" if hiq == "hiq51" else "CSAR-HIQ_36"
                     input_dir = os.path.join("data", data_dir_name)
-                    if os.path.exists(input_dir):
-                        available = {d for d in os.listdir(input_dir)
-                                     if os.path.isdir(os.path.join(input_dir, d))
-                                     and os.path.exists(os.path.join(input_dir, d, f"{d}_protein.pdb"))}
-                        expected_gt_ids = expected_gt_ids.intersection(available)
-                        expected_total = len(expected_gt_ids)
+                    expected_gt_ids = resolve_expected(
+                        dataset_name, expected_gt_ids,
+                        lambda: _subdirs_with(input_dir, "_protein.pdb"))
+                    expected_total = len(expected_gt_ids)
 
             # Filter GT DF for merging? No, merging works regardless.
             # Just need Expected Set for "Missing" calculation.
@@ -467,20 +534,23 @@ def collect_results(outputs_dir="outputs"):
         final_df.to_csv(summary_csv, index=False)
         print(f"\nSaved (and merged) to {summary_csv}")
     
-    # Save Failures
+    # Save Failures. The summary above preserves rows this scan did not reproduce,
+    # and the same care is needed here: a checkout with no outputs/ scans nothing,
+    # which must not be read as "every target succeeded" and take the committed
+    # failure list down with it.
+    outfile = os.path.join("results", "benchmark_failures.csv")
     if all_failures:
         fail_df = pd.DataFrame(all_failures)
-        cols = ['Model', 'Dataset', 'TargetID', 'ErrorType', 'Details', 'Timestamp']
         # Sort by dataset and ID
         fail_df = fail_df.sort_values(by=['Model', 'Dataset', 'TargetID'])
-        
-        outfile = os.path.join("results", "benchmark_failures.csv")
         fail_df.to_csv(outfile, index=False)
         print(f"Saved {len(all_failures)} failure records to {outfile}")
+    elif results:
+        cols = ['Model', 'Dataset', 'TargetID', 'ErrorType', 'Details', 'Timestamp']
+        pd.DataFrame(columns=cols).to_csv(outfile, index=False)
+        print(f"No failures detected. Wrote an empty {outfile}")
     else:
-        print("No failures detected.") # Might delete old failures file
-        if os.path.exists(os.path.join("results", "benchmark_failures.csv")):
-             os.remove(os.path.join("results", "benchmark_failures.csv"))
+        print(f"Nothing scanned. Left {outfile} as it is.")
 
 if __name__ == "__main__":
     collect_results()

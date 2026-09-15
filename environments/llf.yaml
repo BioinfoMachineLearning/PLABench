@@ -30,6 +30,12 @@ dependencies:
   - xz-gpl-tools=5.8.1
   - xz-tools=5.8.1
   - pip:
+      # torch-scatter and torch-sparse are built per torch/CUDA pair and live on
+      # the PyG wheel index, not on PyPI. `conda env export` keeps the local
+      # version label it sees (+pt113cu117) but cannot record where the wheel
+      # came from, so without these two lines pip cannot resolve them.
+      - --find-links https://data.pyg.org/whl/torch-1.13.1+cu117.html
+      - --find-links https://data.pyg.org/whl/torch-1.13.1+cpu.html
       - astor==0.8.1
       - autograd==1.6.2
       - autograd-gamma==0.5.0
