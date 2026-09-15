@@ -26,15 +26,21 @@
 #   set and its update, and Binding MOAD is a static archive now, so the safer route
 #   for these 87 complexes is to pull them from the RCSB by PDB code.
 #
-#   Davis and KIBA ship as the fold CSVs only. The .pkl copies the MixingDTA
-#   cold-start runner reads are the authors' release, row-identical, and linked in
-#   SOURCES.tsv.
+#   Davis and KIBA ship as the pickles MixingDTA released, which is every fold of
+#   both arms and not just the test ones. They stay pickles because the target
+#   sequence repeats on every row and pickle memoizes it: 28 MB against 621 MB for
+#   the same folds as CSV. scripts/cv/export_davis_kiba_folds.py converts them.
 #
 # PDBBIND_SPLITS points at the partition, which lives outside the repository.
 set -euo pipefail
 
 OUT="${OUT:-zenodo_staging}"
 PDBBIND_SPLITS="${PDBBIND_SPLITS:-/bmlfast/Lyuwei/1.Datasets/pdbbind_refined_91}"
+# ONLY=01 rebuilds one archive and leaves the others as they are on disk. A tarball
+# is not byte-reproducible, so rebuilding all four after a one-archive change would
+# churn three checksums and force three re-uploads for nothing. The README and
+# SHA256SUMS are always rewritten from whatever ends up in $OUT.
+ONLY="${ONLY:-}"
 DRY=0
 [ "${1:-}" = "--dry-run" ] && DRY=1
 
@@ -120,9 +126,17 @@ show() {
     return 0
 }
 
+want() {  # want <archive>: in scope for this run?
+    [ -z "$ONLY" ] || [ "${1#"$ONLY"}" != "$1" ]
+}
+
 pack() {  # pack <archive> <member>...
     local name="$1"; shift
     local present=() missing=()
+    if ! want "$name"; then
+        echo "== $name  [kept, ONLY=$ONLY]"
+        return
+    fi
     for m in "$@"; do
         if [ -e "$m" ] || [ -L "$m" ]; then present+=("$m"); else missing+=("$m"); fi
     done
@@ -145,9 +159,13 @@ pack 01_benchmark_inputs.tar.gz \
     data/SOURCES.tsv \
     "$SPLIT_CSV" \
     data/Structure_independent/DAVIS/*.csv \
+    data/Structure_independent/DAVIS/*.pkl \
     data/Structure_independent/DAVIS/cold/*.csv \
+    data/Structure_independent/DAVIS/cold/*.pkl \
     data/Structure_independent/KIBA/*.csv \
+    data/Structure_independent/KIBA/*.pkl \
     data/Structure_independent/KIBA/cold/*.csv \
+    data/Structure_independent/KIBA/cold/*.pkl \
     data/Structure_independent/L1000_casp16_test.csv \
     data/Structure_independent/L3000_casp16_test.csv \
     data/Structure_independent/CSAR-HIQ_36_standardized_test.csv \
@@ -209,6 +227,9 @@ pack 03_checkpoints.tar.gz \
 # ---------------------------------------------------------------------------
 # (4) leakage tables, per-model predictions and the scored metrics
 # ---------------------------------------------------------------------------
+if ! want 04_predictions_and_metrics.tar.gz; then
+    echo "== 04_predictions_and_metrics.tar.gz  [kept, ONLY=$ONLY]"
+else
 PRED_LIST=$(mktemp)
 live_predictions | sort > "$PRED_LIST"
 echo "== 04_predictions_and_metrics.tar.gz"
@@ -228,6 +249,7 @@ if [ "$DRY" = 0 ]; then
         results/casp16_leakage results/tables results/README.md
 fi
 rm -f "$PRED_LIST"
+fi
 
 if [ "$DRY" = 1 ]; then
     echo
@@ -249,7 +271,8 @@ https://github.com/BioinfoMachineLearning/PLABench
 
   01_benchmark_inputs.tar.gz        Split partitions, the filtered and full
                                     ChEMBL35 sets with their removal ledger, the
-                                    CASP16 targets in pKd, and SOURCES.tsv
+                                    CASP16 targets in pKd, every Davis and KIBA
+                                    fold, and SOURCES.tsv
   02_af3_structures.tar.gz          AlphaFold 3 structures for ChEMBL35 and CASP16
   03_checkpoints.tar.gz             The weights PLABench trained, plus the
                                     third-party weight inventory
@@ -263,11 +286,22 @@ Every path inside is relative to the repository root, so unpack from there:
     for f in /path/to/0*.tar.gz; do tar xzf "$f"; done
     sha256sum -c /path/to/SHA256SUMS.txt   # run from the directory holding the tarballs
 
+DAVIS AND KIBA
+
+Complete: train, validation and test, for the warm-start arm and for both
+cold-start arms. Everything but the test folds is in the pickle format the
+MixingDTA authors released, because the target sequence repeats on every row and
+pickle stores it once, which is 28 MB against 621 MB for the same folds as CSV.
+To get CSVs with the same four columns as the test files, run, from the
+repository root:
+
+    python scripts/cv/export_davis_kiba_folds.py
+
 WHAT IS NOT HERE, AND WHY
 
 PLABench artifacts are deposited; corpora other people built are linked instead.
 data/SOURCES.tsv in archive 01 gives the origin and the license of every path,
-and three cases change what you get:
+and two cases change what you get:
 
   PDBbind v2020 forbids redistribution without written permission. Archive 01
   carries the 4,465 / 497 refined partition as compound_id,split and nothing
@@ -278,10 +312,6 @@ and three cases change what you get:
   and 51 structure sets are NOT here. Their standardized PDB-code / SMILES / pKd
   tables are, which is enough to rescore once you have the complexes. Fetch the
   87 entries from https://www.rcsb.org/ by PDB code.
-
-  Davis and KIBA are here as the fold CSVs. The .pkl copies the MixingDTA
-  cold-start runner reads are the authors' release and are row-identical; get
-  them from https://github.com/rokieplayer20/MixingDTA
 
 LICENSES
 

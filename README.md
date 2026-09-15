@@ -7,7 +7,7 @@ from model quality.
 
 This is the code and data behind "Leakage-controlled benchmarking reveals
 generalization limits of deep learning for protein-ligand binding affinity
-prediction" (Wang and Cheng). See [Citation](#citation).
+prediction", by Lyuwei Wang and Jianlin Cheng. See [Citation](#citation).
 
 ```bash
 git clone --recurse-submodules https://github.com/BioinfoMachineLearning/PLABench.git
@@ -138,7 +138,7 @@ archives, about 6 GB, unpacking over `data/`, `checkpoints/`, `outputs/` and
 What ships is decided by who made it: PLABench artifacts go in, corpora other
 people built are linked instead. `checkpoints/` splits the same way, between
 `MANIFEST.tsv` and `THIRD_PARTY.tsv`. `data/SOURCES.tsv` gives the call and the
-license for every path under `data/`. Three of those calls change what you get:
+license for every path under `data/`. Two of those calls change what you get:
 
 - PDBbind v2020 forbids redistribution without written permission, so the
   deposit carries the 4,465 / 497 refined partition as `compound_id,split` and
@@ -152,9 +152,20 @@ license for every path under `data/`. Three of those calls change what you get:
   CSAR-NRC HiQ set and its update, but Binding MOAD is sunset and static now, so
   fetching the 87 entries from the [RCSB](https://www.rcsb.org/) by PDB code is
   the safer route.
-- Davis and KIBA ship as the fold CSVs. The `.pkl` copies the MixingDTA
-  cold-start runner reads are the authors' release and are row-identical; get
-  them from [MixingDTA](https://github.com/rokieplayer20/MixingDTA).
+
+Davis and KIBA are complete: train, validation and test, for the warm-start arm
+and for both cold-start arms. Everything except the test folds is in the pickle
+format [MixingDTA](https://github.com/rokieplayer20/MixingDTA) released, because
+the target sequence repeats on every row and pickle stores it once, which is
+28 MB against 621 MB for the same folds as CSV. For CSVs with the same four
+columns as the test files:
+
+```bash
+python scripts/cv/export_davis_kiba_folds.py
+```
+
+It rebuilds every CSV that already exists before writing anything, so a change
+in the pickled row layout fails there rather than in a training run.
 
 The AlphaFold3 structures are distributable under the AlphaFold3 Output Terms of
 Use, non-commercially, and the archive carries the modification notice those
@@ -244,9 +255,11 @@ inside it.
 `forks/MixingDTA`, and `PLABENCH_DEVICE` sets the torch device for the
 cross-validation runners.
 
-## Versions
+## Versions and commit hashes
 
-The exact code every number in the paper came from.
+Every number in the paper was produced by the code pinned in the three tables
+below: the nine model forks, the external tools, and the hardware each model ran
+on.
 
 ### Model forks
 

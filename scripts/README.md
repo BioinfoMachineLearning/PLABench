@@ -84,6 +84,7 @@ This one goes to the journal, not to Zenodo, and is gitignored.
 | --- | --- |
 | `run_deepdta_cv.py`, `run_llf_cv.py`, `run_mixingdta_cv.py` | `outputs/<model>/<config>/fold_<n>/predictions.csv` for the Davis and KIBA five-fold splits |
 | `collect_kiba_davis_cv.py` | The Davis and KIBA rows of `results/benchmark_summary.csv`, plus per-fold metrics in `analysis/davis_kiba_cv_metrics.csv` |
+| `export_davis_kiba_folds.py` | `data/Structure_independent/{DAVIS,KIBA}/**/{train,valid}_*.csv`: the folds that ship as pickles, written out with the same four columns as the test files. Verifies the 14 pre-made test CSVs first and stops if any fails to match |
 
 ## `leakage/`
 
