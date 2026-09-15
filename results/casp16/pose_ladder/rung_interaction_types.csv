@@ -1,0 +1,19 @@
+rung,rung_label,type,n_ligands,crystal,predicted,total_pct,kept,lost,gained,loss_pct
+boltz2,6.96 A,contact,93,1302,1289,-1.0,704,598,585,45.9
+boltz2,6.96 A,hydrophobic,93,593,569,-4.0,284,309,285,52.1
+boltz2,6.96 A,hbond,93,227,188,-17.2,38,189,150,83.3
+boltz2,6.96 A,pistack,93,112,114,1.8,20,92,94,82.1
+boltz2,6.96 A,halogen,93,86,112,30.2,19,67,93,77.9
+boltz2,6.96 A,saltbridge,93,1,5,400.0,0,1,5,100.0
+tplpocket,3.72 A,contact,93,1302,1348,3.5,956,346,392,26.6
+tplpocket,3.72 A,hydrophobic,93,593,595,0.3,352,241,243,40.6
+tplpocket,3.72 A,hbond,93,227,206,-9.3,98,129,108,56.8
+tplpocket,3.72 A,pistack,93,112,114,1.8,41,71,73,63.4
+tplpocket,3.72 A,halogen,93,86,94,9.3,39,47,55,54.7
+tplpocket,3.72 A,saltbridge,93,1,2,100.0,0,1,2,100.0
+af3,0.76 A,contact,93,1302,1330,2.2,1139,163,191,12.5
+af3,0.76 A,hydrophobic,93,593,603,1.7,451,142,152,23.9
+af3,0.76 A,hbond,93,227,247,8.8,163,64,84,28.2
+af3,0.76 A,pistack,93,112,113,0.9,66,46,47,41.1
+af3,0.76 A,halogen,93,86,91,5.8,64,22,27,25.6
+af3,0.76 A,saltbridge,93,1,2,100.0,1,0,1,0.0

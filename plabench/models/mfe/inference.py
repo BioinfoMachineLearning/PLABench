@@ -11,7 +11,7 @@ Usage:
     python -m plabench.models.mfe.inference \
         --input_dir data/casp16_data/stage2_input/L3000_prepared \
         --output_dir outputs/mfe/experimental_casp16_l3000_stage2 \
-        --checkpoint checkpoints/mfe/best_model.pt \
+        --checkpoint checkpoints/structure/mfe/best_model.pt \
         --device cuda
 """
 

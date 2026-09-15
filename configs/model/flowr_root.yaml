@@ -5,11 +5,10 @@ type: flow_matching
 flowr_root_dir: forks/flowr_root
 
 # flowr_root conda environment python
-flowr_root_env: /bmlfast/Lyuwei/miniconda3/envs/flowr_root/bin/python
+flowr_root_env: ${oc.env:FLOWR_ROOT_PYTHON,/bmlfast/Lyuwei/miniconda3/envs/flowr_root/bin/python}
 
-# Model checkpoint — copied to /dev/shm (RAM-backed) to avoid NFS contention
-# during multi-seed runs. Original on NFS: checkpoints/flowr_root_v2.1.ckpt
-ckpt_path: /dev/shm/flowr_root_v2.1.ckpt
+# Model checkpoint (third-party; see checkpoints/THIRD_PARTY.tsv for the official source).
+ckpt_path: checkpoints/structure/flowr_root/flowr_root_v2.1.ckpt
 
 # High-quality recommended params (per scripts/predict_aff.sl)
 arch: pocket

@@ -57,7 +57,7 @@ class TestDataset(Dataset):
                 torch.tensor(label, dtype=torch.float))
 
 
-def run_inference(test_file, model_dir, output_file, device_str="cuda", dataset_name="unknown", fold=1, task="warm_start"):
+def run_inference(test_file, model_dir, output_file, device_str="cuda", dataset_name="unknown", fold=1, task="warm_start", seqlen_override=None):
     """
     Run DeepDTA inference on a single CSV dataset.
 
@@ -93,7 +93,7 @@ def run_inference(test_file, model_dir, output_file, device_str="cuda", dataset_
     log.info(f"ID column: '{id_col}', Seq: '{seq_col}', SMILES: '{smi_col}', Affinity: '{aff_col}'")
 
     # --- Determine paths based on CV logic ---
-    base_proj_dir = '/home/lwfvx/Lyuwei/0.Projects/DeepDTA-Pytorch'
+    base_proj_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../forks/DeepDTA-Pytorch'))
     seqlen = 2000
     smilen = 250
     pro_vocab_size = None
@@ -243,6 +243,13 @@ def run_inference(test_file, model_dir, output_file, device_str="cuda", dataset_
     log.info(f"Model loaded from {model_path}")
 
     # --- Inference ---
+    # DeepDTA global-max-pools over the sequence axis, so the window is a data-prep choice
+    # rather than an architectural one; an override lets a checkpoint trained at a different
+    # window be scored at the window it was trained on.
+    if seqlen_override is not None:
+        seqlen = int(seqlen_override)
+        log.info(f"seqlen overridden to {seqlen}")
+
     ds = TestDataset(df, protein_dict, ligand_dict, seq_col, smi_col, aff_col, seqlen, smilen)
     loader = DataLoader(ds, batch_size=256, shuffle=False)
 
@@ -289,7 +296,9 @@ if __name__ == '__main__':
                         help='Fold number for CV')
     parser.add_argument('--task', type=str, default='warm_start',
                         help='Task type for CV (warm_start, cold_drug, cold_target)')
+    parser.add_argument('--seqlen', type=int, default=None,
+                        help='Override max protein sequence length (must match training)')
     args = parser.parse_args()
 
     run_inference(args.test_file, args.model_dir, args.output_file, args.device,
-                  args.dataset_name, args.fold, args.task)
+                  args.dataset_name, args.fold, args.task, args.seqlen)

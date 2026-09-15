@@ -1,8 +1,0 @@
-name: casp16_l3000_stage2
-path: data/casp16_data/stage2_input/L3000_prepared
-# Stage 2 needs clean SMILES to construct graph (from Stage 1 source)
-smiles_source_dir: data/casp16_data/smiles/L3000
-target_pattern: "L3*"
-# Expected output format (Affinity)
-ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
-series_group: casp16_stage2  # CASP16 L1000/L3000 pair for weighted aggregation

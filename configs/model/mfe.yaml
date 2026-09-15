@@ -1,8 +1,8 @@
 name: mfe
 type: multimodal
-checkpoint: checkpoints/mfe/best_model.pt
+checkpoint: checkpoints/structure/mfe/best_model.pt
 mfe_root: forks/MFE
-conda_env: /bmlfast/Lyuwei/miniconda3/envs/MFE
+conda_env: ${oc.env:MFE_ENV,/bmlfast/Lyuwei/miniconda3/envs/MFE}
 # ProtBert: auto-downloads from HuggingFace on first run.
 # For offline use, download manually and set local path here.
 # e.g. protbert_model: /path/to/local/Rostlab/prot_bert

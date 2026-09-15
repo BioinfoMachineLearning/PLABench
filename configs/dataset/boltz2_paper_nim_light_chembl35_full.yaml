@@ -1,5 +1,0 @@
-# Paper authors' NIM_light predictions on ChEMBL35 (Data_S5,
-# column "Predicted_affinity_value_NIM_light"), filtered to our 7650 GT.
-name: boltz2_paper_nim_light_chembl35_full
-ground_truth_path: data/chembl35/chembl35_full_input.csv
-multi_protein: true

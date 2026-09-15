@@ -1,0 +1,7 @@
+name: mfe_chembl35_multimer
+path: data/AF3_structures/chembl35_multimer
+mode: inference
+ground_truth_path: data/AF3_structures/chembl35_multimer/ground_truth.csv
+ground_truth_format: csv
+target_pattern: "*"
+multi_protein: true

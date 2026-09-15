@@ -6,6 +6,9 @@ import sys
 import logging
 import importlib
 
+from plabench.analysis.units import dg_to_pkd
+from plabench.utils.checkpoint_setup import ensure_checkpoints
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 log = logging.getLogger(__name__)
@@ -91,6 +94,14 @@ def main(cfg: DictConfig):
         log.error(f"Configuration resolution failed: {e}")
         return
 
+    # Install the published archive only when this run actually lacks a
+    # checkpoint. This keeps normal runs offline and makes a fresh clone usable.
+    try:
+        ensure_checkpoints(cfg.model, cfg.dataset)
+    except Exception as e:
+        log.error(f"Checkpoint setup failed: {e}")
+        return
+
     # 2. Instantiate Wrapper
     try:
         WrapperClass = get_wrapper_class(cfg.model.name)
@@ -165,9 +176,9 @@ def main(cfg: DictConfig):
                      preds_df['name_clean'] = preds_df['name'].astype(str).str.replace(r"['\[\]]", "", regex=True)
                      merged = pd.merge(preds_df, gt_df, left_on="name_clean", right_on=gt_id_col)
 
-                # Unit conversion for CASP16 datasets (kcal/mol -> pKd)
+                # Unit conversion for CASP16 datasets (dG in kcal/mol -> pKd)
                 if "l1000" in cfg.dataset.name.lower() or "l3000" in cfg.dataset.name.lower():
-                    merged[gt_score_col] = merged[gt_score_col] * -0.733
+                    merged[gt_score_col] = dg_to_pkd(merged[gt_score_col])
 
             if len(merged) > 0:
                  # Drop rows with NaN predictions or ground truth

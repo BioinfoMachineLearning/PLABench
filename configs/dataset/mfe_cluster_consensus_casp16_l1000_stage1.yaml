@@ -1,8 +1,0 @@
-
-name: mfe_cluster_consensus_casp16_l1000_stage1
-path: data/cofold_structures/cluster_consensus/L1000
-mode: inference
-ground_truth_path: data/casp16_data/labels/L1000_exper_affinity.csv
-ground_truth_format: csv
-target_pattern: "L*"
-series_group: mfe_cluster_consensus_casp16_stage1  # CASP16 L1000/L3000 pair for weighted aggregation

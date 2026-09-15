@@ -1,8 +1,0 @@
-# MFE AF3 on remaining 74 targets (7091 compounds) — chembl35_full minus already-done 559
-name: mfe_af3_chembl35_remaining
-path: data/AF3_structures/chembl35_full
-mode: inference
-ground_truth_path: tmp/chembl35_remaining_input.csv
-ground_truth_format: csv
-target_pattern: "*"
-multi_protein: true

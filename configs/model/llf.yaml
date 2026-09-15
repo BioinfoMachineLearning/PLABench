@@ -5,4 +5,4 @@ model_dir: forks/LLF
 models_source_dir: forks/LLF
 output_dir: outputs/${model.name}/${dataset.name}/latest
 device: cuda
-python_path: /bmlfast/Lyuwei/0.Projects/LLF/.conda/bin/python
+python_path: ${oc.env:LLF_PYTHON,/bmlfast/Lyuwei/0.Projects/LLF/.conda/bin/python}

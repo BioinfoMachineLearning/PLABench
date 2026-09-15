@@ -4,12 +4,21 @@ import pandas as pd
 import glob
 import logging
 import yaml
-from plabench.analysis.metrics import calculate_metrics
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from plabench.analysis.metrics import calculate_metrics  # noqa: E402
+from plabench.analysis.units import dg_to_pkd  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 
-def load_dataset_config(dataset_name, config_dir="configs/dataset"):
+MODEL_CONFIG_DIR = "configs/model"
+DATASET_CONFIG_DIR = "configs/dataset"
+
+
+def load_dataset_config(dataset_name, config_dir=DATASET_CONFIG_DIR):
     """Load a dataset YAML config. Returns {} if not found."""
     path = os.path.join(config_dir, f"{dataset_name}.yaml")
     if not os.path.exists(path):
@@ -20,6 +29,21 @@ def load_dataset_config(dataset_name, config_dir="configs/dataset"):
     except Exception as e:
         logging.warning(f"Failed to parse {path}: {e}")
         return {}
+
+
+def is_release_run(model_name, dataset_name):
+    """True when both halves of a run still have a live Hydra config.
+
+    `outputs/` accumulates exploratory runs whose configs were later moved to
+    `archive/configs/`, and those must not reach `results/`. Skipping them at scan
+    time is not enough on its own: the merges below deliberately preserve existing
+    rows the scan did not reproduce, which would keep an orphan alive forever. The
+    same predicate is therefore applied to the preserved frame, so running this
+    script twice in a row is a no-op and running it once cleans up after an
+    archived experiment.
+    """
+    return (os.path.exists(os.path.join(MODEL_CONFIG_DIR, f"{model_name}.yaml"))
+            and os.path.exists(os.path.join(DATASET_CONFIG_DIR, f"{dataset_name}.yaml")))
 
 
 def collect_results(outputs_dir="outputs"):
@@ -62,11 +86,14 @@ def collect_results(outputs_dir="outputs"):
         timestamp = path_parts[-2]
         run_dir = os.path.dirname(pf)
 
+        if not is_release_run(model_name, dataset_name):
+            continue
+
         # Datasets with multi_protein=true in their YAML config contain multiple
         # protein series mixed together. Pooled metrics across them are misleading
         # (Simpson's paradox), so skip pooled computation here. Per-target metrics
         # and weighted averages are computed via the per-target block below +
-        # analysis/weighted_summary.py.
+        # scripts/weighted_summary.py.
         ds_cfg = load_dataset_config(dataset_name)
         if ds_cfg.get("multi_protein"):
             continue
@@ -239,12 +266,10 @@ def collect_results(outputs_dir="outputs"):
                 merged = pd.merge(preds_df, gt_df, left_on="name_clean", right_on=gt_id_col)
             
             if len(merged) > 0:
-                # Unit conversion: CASP16 affinity is in kJ/mol -> pKd
+                # Unit conversion: CASP16 affinity is a dG in kcal/mol -> pKd.
                 # CASF-2013 is already -logKd/Ki, no conversion needed
                 if "l1000" in dataset_name.lower() or "l3000" in dataset_name.lower():
-                    # pKd = Affinity / -1.36423
-                    # pKd = Affinity * -0.733 (Standardized Constant)
-                    merged[gt_score_col] = merged[gt_score_col] * -0.733
+                    merged[gt_score_col] = dg_to_pkd(merged[gt_score_col])
                 
                 metrics = calculate_metrics(merged["prediction"], merged[gt_score_col])
                 metrics['Model'] = model_name
@@ -324,6 +349,8 @@ def collect_results(outputs_dir="outputs"):
         path_parts = pf.split(os.sep)
         model_name = path_parts[-4]
         dataset_name = path_parts[-3]
+        if not is_release_run(model_name, dataset_name):
+            continue
         ds_cfg = load_dataset_config(dataset_name)
         if not ds_cfg.get("multi_protein"):
             continue
@@ -385,7 +412,11 @@ def collect_results(outputs_dir="outputs"):
             try:
                 existing = pd.read_csv(per_target_csv)
                 new_keys = set(tuple(x) for x in pt_df[['Model', 'Dataset', 'Target']].values)
-                mask = existing.apply(lambda r: (r['Model'], r['Dataset'], r['Target']) not in new_keys, axis=1)
+                live = existing.apply(lambda r: is_release_run(r['Model'], r['Dataset']), axis=1)
+                if (~live).any():
+                    logging.info(f"Dropping {int((~live).sum())} per-target rows from archived configs")
+                mask = live & existing.apply(
+                    lambda r: (r['Model'], r['Dataset'], r['Target']) not in new_keys, axis=1)
                 pt_df = pd.concat([existing[mask], pt_df], ignore_index=True)
                 pt_df = pt_df.sort_values(by=['Dataset', 'Model', 'Target'])
             except Exception as e:
@@ -413,8 +444,15 @@ def collect_results(outputs_dir="outputs"):
                 existing_df = pd.read_csv(summary_csv)
                 # Create keys for merging
                 new_keys = set(tuple(x) for x in new_df[['Model', 'Dataset']].values)
-                # Keep existing rows that are NOT in the new scan
-                mask = existing_df.apply(lambda row: (row['Model'], row['Dataset']) not in new_keys, axis=1)
+                # Keep existing rows that are NOT in the new scan, as long as they
+                # still correspond to a live config. The Davis and KIBA rows come
+                # from scripts/cv/collect_kiba_davis_cv.py rather than from this
+                # scan, and survive here.
+                live = existing_df.apply(lambda r: is_release_run(r['Model'], r['Dataset']), axis=1)
+                if (~live).any():
+                    logging.info(f"Dropping {int((~live).sum())} summary rows from archived configs")
+                mask = live & existing_df.apply(
+                    lambda row: (row['Model'], row['Dataset']) not in new_keys, axis=1)
                 preserved_df = existing_df[mask]
                 
                 final_df = pd.concat([preserved_df, new_df], ignore_index=True)

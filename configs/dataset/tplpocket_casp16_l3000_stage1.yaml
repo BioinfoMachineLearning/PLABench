@@ -1,0 +1,12 @@
+name: tplpocket_casp16_l3000_stage1
+# Boltz-2 re-folded with a template + a forced pocket constraint: the 3.7 A rung
+# between the unguided Boltz-2 cofold (6.96 A) and AF3 top-1 (0.73 A).
+path: data/Boltz2_tplpocket_structures/L3000
+mode: stage1
+target_pattern: "L3*"
+ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
+# FlowDock fields (ignored by other models)
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+series_group: tplpocket_casp16_stage1

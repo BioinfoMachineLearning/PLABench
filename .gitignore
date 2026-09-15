@@ -1,14 +1,33 @@
-data/
+data/*
+!data/SOURCES.tsv
 outputs/
+# Built by scripts/make_source_data.py and uploaded to the journal, not tracked here.
+source_data/
+source_data.zip
+# Built by scripts/package_zenodo.sh and uploaded to Zenodo, not tracked here.
+zenodo_staging/
 tmp/
 casp17/
 logs/
-checkpoints/
+checkpoints/*
+!checkpoints/LINKS.tsv
+!checkpoints/MANIFEST.tsv
+!checkpoints/THIRD_PARTY.tsv
+!checkpoints/README.md
 paper/
 agent.md
 casp17.md
 chembl35.md
 flowr_data.md
+.vscode
 .claude
+/analysis/
+/archive/
 __pycache__/
 *.pyc
+scratch/
+
+# A 229 MB working dump from the pose and affinity probes. The two tables and the
+# figure the paper takes from it now live in results/casp16/pose_ladder/ and
+# results/figures/.
+results/unclassified_probe/

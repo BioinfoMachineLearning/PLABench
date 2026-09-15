@@ -17,7 +17,7 @@ class MFEWrapper:
         self.config = config
         self.output_dir = os.path.abspath(config.output_dir)
         self.checkpoint = os.path.abspath(config.get(
-            'checkpoint', 'checkpoints/mfe/best_model.pt'))
+            'checkpoint', 'checkpoints/structure/mfe/best_model.pt'))
         self.mfe_root = os.path.abspath(config.get('mfe_root', 'forks/MFE'))
         self.device = config.get('device', 'cuda')
         self.protbert_model = config.get('protbert_model', 'Rostlab/prot_bert')

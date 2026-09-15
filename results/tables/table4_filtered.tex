@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\caption{Performance comparison of different models on the ChEMBL35 dataset after ligand-similarity filtering (4,862 ligands, 71 targets; every test ligand within ECFP4 Tanimoto 0.85 of any ligand in the fourteen audited training corpora is removed). Bold values indicate the best performance.}
+\label{tab:chembl35_summary}
+\begin{center}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lccccccc}
+\toprule
+Model & MSE $\downarrow$ & RMSE $\downarrow$ & Pearson $\uparrow$ & Spearman $\uparrow$ & Kendall $\uparrow$ & $R_m^2 \uparrow$ & CI $\uparrow$ \\
+\midrule
+Boltz2 & 1.692 & 1.248 & 0.321 & 0.302 & 0.211 & 0.098 & 0.606 \\
+FlowDock & 2.216 & 1.369 & 0.188 & 0.173 & 0.120 & 0.051 & 0.560 \\
+FLOWR.ROOT & {\textbf{0.931}} & {\textbf{0.928}} & {\textbf{0.392}} & {\textbf{0.374}} & {\textbf{0.264}} & {\textbf{0.168}} & {\textbf{0.632}} \\
+Graph\_RG & 1.973 & 1.340 & 0.146 & 0.128 & 0.089 & 0.035 & 0.544 \\
+LCDD-team & 1.636 & 1.221 & 0.157 & 0.131 & 0.091 & 0.038 & 0.545 \\
+MFE & 1.626 & 1.212 & 0.177 & 0.162 & 0.111 & 0.048 & 0.556 \\
+\midrule
+DeepDTA & 2.165 & 1.393 & 0.153 & 0.151 & 0.103 & 0.045 & 0.551 \\
+LLF & 2.503 & 1.462 & 0.212 & 0.208 & 0.144 & 0.072 & 0.572 \\
+MixingDTA & 1.814 & 1.272 & 0.173 & 0.162 & 0.112 & 0.048 & 0.556 \\
+\bottomrule
+\end{tabular}
+}
+\end{center}
+\end{table*}

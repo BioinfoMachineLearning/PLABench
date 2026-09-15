@@ -1,0 +1,9 @@
+name: af3_chembl35_multimer
+path: data/AF3_structures/chembl35_multimer
+mode: stage1
+target_pattern: "*"
+ground_truth_path: data/AF3_structures/chembl35_multimer/ground_truth.csv
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+multi_protein: true

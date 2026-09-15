@@ -1,0 +1,21 @@
+# Provenance of everything under data/. The rule is the one checkpoints/ already uses:
+# what PLABench generated goes into the Zenodo deposit, what someone else built is linked.
+# "deposit" = shipped in the Zenodo archive; "link" = download it yourself from the source below.
+# Checked 2026-09-15.
+#
+# path	what it is	origin	license	deposit / link	note
+data/pdbbind2020/full.csv	12,378 PDBbind 2020 general complexes, sequence + SMILES + affinity	PDBbind v2020	redistribution not granted; free academic access after registration at pdbbind.org.cn/enroll.php	link	leakage-audit corpus only, never a benchmark. Mirror used here: https://huggingface.co/datasets/photonmz/pdbbindpp-2020
+data/pdbbind2020/{train,val,test}.csv	deleted	-	-	neither	the dump ran without split labels, so all 12,378 rows landed in `none` and the three files were written with a header and no rows. Nothing read them. The real partition is the PDBBIND_SPLITS row below
+PDBBIND_SPLITS/pdbbind_{train,val}_full.csv	the 4,465 / 497 refined train/val partition	partition by this study; rows from PDBbind v2020	rows not redistributable	deposit (partition only)	the deposit ships compound_id + split. Rejoin against the mirror above to recover sequences, SMILES and affinities
+data/Structure_independent/DAVIS, KIBA (*.csv)	warm / cold-target / cold-drug fold assignments	folds by this study; rows from Davis et al. 2011 and Tang et al. 2014 via TDC	CC-BY-4.0 (TDC)	deposit	https://tdcommons.ai/multi_pred_tasks/dti/
+data/Structure_independent/DAVIS, KIBA (*.pkl)	indexed tensors the MixingDTA cold-start runner reads	MixingDTA authors' release	no separate data license; code MIT	link	https://github.com/rokieplayer20/MixingDTA . Row-identical to the CSV copies
+data/Structure_independent/L{1000,3000}_casp16_test.csv	CASP16 stage-1 affinity targets converted to pKd	conversion by this study; affinities donated to CASP by Hoffmann-La Roche	Prediction Center publishes no redistribution grant	deposit (converted values)	https://predictioncenter.org/casp16/ . Raw target files stay at the Prediction Center
+data/chembl35/chembl35_filtered_input.csv	4,862 pairs / 71 targets after the Tanimoto 0.85 leakage filter	filter by this study; rows from ChEMBL 35 via Shimizu et al.	CC-BY-SA-3.0 (ChEMBL 35) with CC-BY-4.0 (Zenodo 18669539)	deposit	share-alike propagates: the deposit carries CC-BY-SA
+data/chembl35/chembl35_full_input.csv	7,650 pairs / 84 targets, the unfiltered arm	Shimizu et al., Zenodo 18669539	CC-BY-4.0	deposit	https://zenodo.org/records/18669539
+data/chembl35/chembl35_filter_ledger.csv	per-target removal counts for the filter	this study	-	deposit	-
+data/chembl35/chembl35_removed_rows.csv	the 2,788 rows the filter dropped, with the corpus that matched	this study	-	deposit	-
+data/chembl35/target_class_map.csv	UniProt accession to protein family	this study, from UniProt	CC-BY-4.0 (UniProt)	deposit	-
+data/chembl35/Data_S1_target_aaseq.csv	target sequences of the 84 ChEMBL35 targets	Shimizu et al. supplementary Data S1	CC-BY-4.0	deposit	https://zenodo.org/records/18669539
+data/AF3_structures/{chembl35_full,chembl35_multimer,L1000,L3000}	AlphaFold3 top-ranked complexes, converted to protein.pdb + ligand.sdf + ligand.mol2 + ligand.smi, one directory per complex	this study, using AlphaFold3 3.0.1	AlphaFold3 Output Terms of Use; non-commercial	deposit	Output may be distributed; the CIF-to-PDB/SDF conversion is the modification the Terms require notice of. See NOTICE_ALPHAFOLD3.txt in the archive
+data/CSAR-HIQ_36, data/CSAR-HIQ_51	87 curated protein-ligand complexes	CSAR NRC HiQ set (Carlson lab); the CSAR portal is discontinued	no redistribution grant published	link	https://bindingmoad.org/Home/download serves "CSAR-NRC HiQ set" (CSAR_NRC_HiQ_Set_24Sept2010.tar, 343 complexes) and "CSAR-NRC HiQ Update" (467 after the update); Binding MOAD is itself sunset and now a static archive. Our 87 are a subset, each addressable by PDB code at https://www.rcsb.org/
+data/Structure_independent/CSAR-HIQ_{36,51}_standardized_test.csv	the same 87 complexes as PDB-code / SMILES / pKd rows	standardisation by this study	affinity values from CSAR	deposit (standardised table)	enough to rescore once the structures are downloaded

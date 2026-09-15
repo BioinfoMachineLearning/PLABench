@@ -155,7 +155,7 @@ def process_csv(csv_file, max_len=1200):
 
 def get_model_path(dataset_name, fold, task):
     # Base path for LLF models
-    base_proj_dir = "/home/lwfvx/Lyuwei/0.Projects/LLF/models"
+    base_proj_dir = os.path.abspath(os.path.join(model_source_dir, "models"))
 
     # Map task/dataset to directory structure
     # Scenarios:

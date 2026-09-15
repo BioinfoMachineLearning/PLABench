@@ -1,0 +1,13 @@
+# PLABench-trained checkpoints shipped in the Zenodo archive (third-party files: see THIRD_PARTY.tsv).
+# '-' = no compatibility link; the config points at the checkpoints/ path directly.
+# archive-relative checkpoint path	repository-relative compatibility link
+structure/mfe/best_model.pt	-
+sequence/deepdta/pdbbind/model_refined91.pt	forks/DeepDTA-Pytorch/pdbbind2020_refined91_results/model_refined91.pt
+sequence/deepdta/pdbbind/protein_dict-prk12-ldk8.json	forks/DeepDTA-Pytorch/pdbbind2020_refined91_results/protein_dict-prk12-ldk8.json
+sequence/deepdta/pdbbind/ligand_dict-prk12-ldk8.json	forks/DeepDTA-Pytorch/pdbbind2020_refined91_results/ligand_dict-prk12-ldk8.json
+sequence/llf/pdbbind/best_model_full.pth	forks/LLF/models/pdbbind/best_model_full.pth
+sequence/mixingdta/pdbbind/results_none/1_fold_valid_best_checkpoint.pth	forks/MixingDTA/MEETA/results_refined_91/results_none/PDBbind_Refined_91/1_fold_valid_best_checkpoint.pth
+sequence/mixingdta/pdbbind/results_all_pair/1_fold_valid_best_checkpoint.pth	forks/MixingDTA/MEETA/results_refined_91/results_all_pair/PDBbind_Refined_91/1_fold_valid_best_checkpoint.pth
+sequence/mixingdta/pdbbind/results_drug/1_fold_valid_best_checkpoint.pth	forks/MixingDTA/MEETA/results_refined_91/results_drug/PDBbind_Refined_91/1_fold_valid_best_checkpoint.pth
+sequence/mixingdta/pdbbind/results_reversed/1_fold_valid_best_checkpoint.pth	forks/MixingDTA/MEETA/results_refined_91/results_reversed/PDBbind_Refined_91/1_fold_valid_best_checkpoint.pth
+sequence/mixingdta/pdbbind/result_integration/1_fold_valid_best_checkpoint.pth	forks/MixingDTA/MEETA/results_refined_91/result_integration/PDBbind_Refined_91/1_fold_valid_best_checkpoint.pth

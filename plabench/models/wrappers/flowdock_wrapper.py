@@ -75,9 +75,10 @@ class FlowDockWrapper:
         sample_script = os.path.join(
             self.flowdock_root, self.flowdock_exec_dir, "src", "sample.py"
         )
-        ckpt_path = os.path.join(
-            self.flowdock_root, self.model_checkpoint
-        )
+        ckpt_path = os.path.abspath(self.model_checkpoint)
+        if not os.path.isabs(self.model_checkpoint):
+            repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+            ckpt_path = os.path.join(repo_root, self.model_checkpoint)
 
         cmd = [
             self.flowdock_env, sample_script,

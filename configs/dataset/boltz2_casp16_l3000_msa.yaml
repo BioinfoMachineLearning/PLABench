@@ -1,7 +1,0 @@
-name: boltz2_casp16_l3000_msa
-sequence_file: data/casp16_data/stage1_input/L3000.txt
-smiles_dir: data/casp16_data/smiles/L3000
-ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
-ground_truth_format: csv
-path: data/casp16_data/smiles/L3000
-series_group: boltz2_casp16_msa  # CASP16 L1000/L3000 pair for weighted aggregation

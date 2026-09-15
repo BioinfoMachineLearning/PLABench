@@ -1,7 +1,7 @@
 name: boltz2
 type: affinity_prediction
 # Only need to change this one path when switching environments
-conda_env: /bmlfast/Lyuwei/miniconda3/envs/boltz
+conda_env: ${oc.env:BOLTZ2_ENV,/bmlfast/Lyuwei/miniconda3/envs/boltz}
 boltz_root: forks/boltz
 use_msa_server: true
 affinity_mw_correction: true

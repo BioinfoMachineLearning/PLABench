@@ -1,0 +1,4 @@
+Method,CASP16_group,N,casp16_submission_kN,plabench_af3_kN,diff,ci_lo,ci_hi,L1000_n,L1000_casp16,L1000_plabench,L3000_n,L3000_casp16,L3000_plabench
+Graph_RG,Haiping (16),140,0.423,0.42,-0.003,-0.036,0.029,17,0.294,0.25,123,0.441,0.444
+BA-Pred,LCDD-team (55),140,0.363,0.394,0.032,-0.078,0.141,17,0.118,0.0,123,0.396,0.449
+FlowDock,MULTICOM_ligand (207),140,0.319,0.319,-0.001,-0.104,0.103,17,0.25,0.118,123,0.329,0.346

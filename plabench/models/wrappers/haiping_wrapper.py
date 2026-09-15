@@ -274,8 +274,12 @@ class HaipingWrapper:
             smiles = None
 
             if smiles_source_dir:
-                # Try .smi first, then .tsv (CASP16 format: TSV with SMILES in 3rd column)
+                # Try .smi first, then .tsv (CASP16 format: TSV with SMILES in 3rd column).
+                # CASP16 keeps the .smi flat next to the directory; the AF3 structure
+                # sets keep it inside the complex directory, beside ligand.sdf.
                 smi_path = os.path.join(smiles_source_dir, f"{pdb_id}.smi")
+                if not os.path.exists(smi_path):
+                    smi_path = os.path.join(smiles_source_dir, pdb_id, "ligand.smi")
                 if os.path.exists(smi_path):
                     with open(smi_path) as sf:
                         smiles = sf.read().strip().split()[0]

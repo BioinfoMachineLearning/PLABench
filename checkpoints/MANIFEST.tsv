@@ -1,0 +1,19 @@
+# Checkpoint inventory. 'in Zenodo archive' rows are PLABench-trained and ship in plabench-checkpoints.tar.gz;
+# THIRD-PARTY rows are downloaded from their official source (THIRD_PARTY.tsv) and are not re-uploaded.
+# DeepDTA cold-start vocabulary JSON files are sidecars in the same archive directories.
+# model	dataset/task	archive path	source	status
+MFE	main structure benchmarks	structure/mfe/best_model.pt	PLABench-trained (PDBbind v2016 core-set split, 50 epochs, 2025-10-03); upstream repo ships no weights	in Zenodo archive
+DeepDTA	PDBbind 2020 refined, 4465/497 (9:1) split	sequence/deepdta/pdbbind/model_refined91.pt + {protein,ligand}_dict-prk12-ldk8.json vocabulary sidecars	PLABench-trained	in Zenodo archive
+LLF	PDBbind 2020 refined, 4465/497 (9:1) split	sequence/llf/pdbbind/best_model_full.pth	PLABench-trained (2025-12-15, best epoch 92)	in Zenodo archive
+MixingDTA	PDBbind 2020 refined, 4465/497 (9:1) split; 4 sub-models + integration	sequence/mixingdta/pdbbind/*	PLABench-trained	in Zenodo archive
+DeepDTA	Davis/KIBA warm + cold-drug + cold-target, 5 folds	sequence/deepdta/{davis,kiba}/{warm,cold_drug,cold_target}/fold_*.pt	PLABench-trained	in Zenodo archive
+DeepDTA	Davis cold-start vocabulary sidecars (KIBA folds use the loader's built-in vocabulary)	sequence/deepdta/davis/{cold_drug,cold_target}/*_dict-prk12-ldk8.json	PLABench-generated	in Zenodo archive
+LLF	Davis/KIBA warm + cold-drug + cold-target, 5 folds	sequence/llf/{davis,kiba}/{warm,cold_drug,cold_target}/fold_*	PLABench-trained	in Zenodo archive
+MixingDTA	Davis/KIBA cold-drug + cold-target, 5 folds	sequence/mixingdta/{davis,kiba}/{cold_drug,cold_target}/fold_*.pth	PLABench-trained	in Zenodo archive
+MixingDTA	Davis/KIBA warm, 5 folds x 7 sub-models	sequence/mixingdta/{davis,kiba}/warm/fold_*/*.pth	THIRD-PARTY: authors' Google Drive release (70/70 hash-verified)	staged locally; see THIRD_PARTY.tsv; NOT for Zenodo unless license allows
+FLOWR.ROOT	main structure benchmarks	structure/flowr_root/flowr_root_v2.1.ckpt	THIRD-PARTY (Google Drive, MIT)	staged locally; see THIRD_PARTY.tsv
+FlowDock	main structure benchmarks	structure/flowdock/esmfold_prior_paper_weights-EMA.ckpt	THIRD-PARTY (Zenodo 15066450, MIT / CC-BY-4.0)	staged locally; see THIRD_PARTY.tsv
+BA-Pred	main structure benchmarks	structure/bapred/BAPred.pth	THIRD-PARTY (GitHub, Apache-2.0)	staged locally; see THIRD_PARTY.tsv
+Graph_RG/Haiping	main structure benchmarks	structure/haiping/full_model_out1800.model	THIRD-PARTY (GitHub LFS, Apache-2.0)	staged locally; see THIRD_PARTY.tsv
+Boltz-2	main structure benchmarks	~/.boltz/{boltz2_conf.ckpt,boltz2_aff.ckpt,mols.tar}	THIRD-PARTY (Hugging Face, MIT); boltz CLI cache, not under checkpoints/	auto-downloaded; see THIRD_PARTY.tsv
+ESM3	MixingDTA protein embedder (PDBbind-mode inference)	ESM3/esm3_sm_open_v1.pth	THIRD-PARTY (Hugging Face, non-commercial, gated)	staged locally; NOT redistributable

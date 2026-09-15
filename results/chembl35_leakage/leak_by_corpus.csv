@@ -1,0 +1,15 @@
+corpus,rows_at_cut,rows_attributed,pct_of_benchmark
+sair,2501,2413,32.69
+bindingdb_pre2412,267,98,3.49
+chembl34_full,205,175,2.68
+bindingnet_full,125,0,1.63
+plinder,58,41,0.76
+kinodata,16,0,0.21
+pdbbind2020_general,9,2,0.12
+omol25,8,4,0.1
+bindingmoad,5,1,0.07
+hiqbind,4,1,0.05
+spindr,4,0,0.05
+pdbbind2020,2,0,0.03
+davis3d,1,0,0.01
+kiba3d,0,0,0.0

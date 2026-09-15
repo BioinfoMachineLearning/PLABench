@@ -1,0 +1,39 @@
+# Model forks. Each points at the lyuweiorg fork's `plabench`
+# branch, which carries the benchmark patches on top of the pinned upstream
+# commit (see forks/README.md for the per-fork change list).
+[submodule "forks/BA-Pred"]
+	path = forks/BA-Pred
+	url = https://github.com/lyuweiorg/BA-Pred.git
+	branch = plabench
+[submodule "forks/boltz"]
+	path = forks/boltz
+	url = https://github.com/lyuweiorg/boltz.git
+	branch = plabench
+[submodule "forks/DeepDTA-Pytorch"]
+	path = forks/DeepDTA-Pytorch
+	url = https://github.com/lyuweiorg/DeepDTA-Pytorch.git
+	branch = plabench
+[submodule "forks/flowr_root"]
+	path = forks/flowr_root
+	url = https://github.com/lyuweiorg/flowr_root.git
+	branch = plabench
+[submodule "forks/haiping_methods"]
+	path = forks/haiping_methods
+	url = https://github.com/lyuweiorg/haiping_methods.git
+	branch = plabench
+[submodule "forks/LLF"]
+	path = forks/LLF
+	url = https://github.com/lyuweiorg/LLF.git
+	branch = plabench
+[submodule "forks/MFE"]
+	path = forks/MFE
+	url = https://github.com/lyuweiorg/MFE.git
+	branch = plabench
+[submodule "forks/MixingDTA"]
+	path = forks/MixingDTA
+	url = https://github.com/lyuweiorg/MixingDTA.git
+	branch = plabench
+[submodule "forks/MULTICOM_ligand"]
+	path = forks/MULTICOM_ligand
+	url = https://github.com/lyuweiorg/MULTICOM_ligand.git
+	branch = plabench

@@ -1,0 +1,10 @@
+
+name: flowr_root_tplpocket_casp16_l3000_stage1
+path: data/Boltz2_tplpocket_structures/L3000
+mode: stage1
+target_pattern: "L3*"
+ground_truth_path: data/casp16_data/labels/L3000_exper_affinity.csv
+boltz2_mode: true
+prot_pattern: "{pdb_id}/protein.pdb"
+lig_pattern: "{pdb_id}/ligand.sdf"
+series_group: flowr_root_tplpocket_casp16_stage1

@@ -1,0 +1,10 @@
+model,L1000_strict,L1000_loose,L1000_lab,L1000_tgt,L3000_strict,L3000_loose,L3000_lab,L3000_tgt
+Boltz2,1,1,1,643,20,21,19,1710
+FLOWR.ROOT,1,1,1,629,14,15,14,2273
+FlowDock,0,0,0,8,0,0,0,21
+Graph_RG,0,0,0,8,0,0,0,15
+MFE,0,0,0,8,0,0,0,15
+LCDD-team,0,0,0,0,0,0,0,0
+DeepDTA,0,0,0,3,0,0,0,0
+LLF,0,0,0,3,0,0,0,0
+MixingDTA,0,0,0,3,0,0,0,0

@@ -1,0 +1,7 @@
+name: haiping_chembl35_multimer
+path: data/AF3_structures/chembl35_multimer
+mode: cofold_stage1
+smiles_source_dir: data/AF3_structures/chembl35_multimer
+target_pattern: "*"
+ground_truth_path: data/AF3_structures/chembl35_multimer/ground_truth.csv
+multi_protein: true

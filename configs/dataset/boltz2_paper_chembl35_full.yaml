@@ -1,6 +1,0 @@
-# Paper authors' Boltz2 predictions on ChEMBL35 (Data_S5_dataset_AB.csv,
-# column "Predicted_affinity_value_original_Boltz2"), filtered to our 7650 GT.
-# Used for apples-to-apples comparison through the same per_target eval pipeline.
-name: boltz2_paper_chembl35_full
-ground_truth_path: data/chembl35/chembl35_full_input.csv
-multi_protein: true  # skip pooled; split by compound_id prefix (UniProt_ID)
