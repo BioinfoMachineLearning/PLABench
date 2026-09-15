@@ -1,7 +1,7 @@
 """DeepDTA chain-rule ablation: retrain the refined-91 model under a given chain rule.
 
 A faithful clone of the deployed /home/lwfvx/Lyuwei/0.Projects/DeepDTA-Pytorch/train_refined91.py
--- same Trainer, same architecture, same optimiser, same 90/10 split -- with three things
+-- same Trainer, same architecture, same optimizer, same 90/10 split -- with three things
 added: the input CSVs are a parameter, seqlen is a parameter, and the run is seeded.
 
 Three arms are defined for the paper:

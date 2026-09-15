@@ -145,7 +145,7 @@ license for every path under `data/`. Three of those calls change what you get:
   nothing else. Rejoin it against
   [photonmz/pdbbindpp-2020](https://huggingface.co/datasets/photonmz/pdbbindpp-2020).
 - CSAR-HiQ never came with terms that allow redistribution and its portal is
-  gone, so the 36 and 51 structure sets are not shipped. The standardised
+  gone, so the 36 and 51 structure sets are not shipped. The standardized
   PDB-code / SMILES / pKd tables are, which is enough to rescore once you have
   the complexes. Binding MOAD's
   [download page](https://bindingmoad.org/Home/download) still serves the
@@ -273,7 +273,7 @@ your own checkout.
 | --- | --- | --- |
 | AlphaFold3 | 3.0.1, commit a8ecdb2 (2025-09-08) | the AF3 input structures for ChEMBL35 and CASP16 |
 | Boltz-2 CLI | 2.2.0 | co-folded structures for the pose ladder, and the Boltz2 arm itself |
-| RDKit | 2024.03.5 | fingerprints and standardisation in the leakage audit |
+| RDKit | 2024.03.5 | fingerprints and standardization in the leakage audit |
 | ESM3 | `esm` 3.1.1, `esm3-sm-open-v1` weights | MixingDTA protein embeddings |
 | MoLFormer-XL | `ibm/MoLFormer-XL-both-10pct` | MixingDTA ligand embeddings |
 | ProtBert | `Rostlab/prot_bert` | MFE protein embeddings |

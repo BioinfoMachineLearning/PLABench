@@ -46,7 +46,7 @@ metrics. `--dry-run` lists the members and sizes without writing anything.
 Membership is decided by provenance, following `data/SOURCES.tsv`: PLABench
 artifacts ship, corpora other people built are linked. So the PDBbind partition
 goes in as `compound_id,split` and not as the rows it was cut from, the CSAR-HiQ
-structures stay out while their standardised tables go in, and Davis and KIBA
+structures stay out while their standardized tables go in, and Davis and KIBA
 ship as CSVs without the MixingDTA pickles. The AlphaFold3 archive carries the
 modification notice its Output Terms of Use require.
 

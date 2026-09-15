@@ -10,7 +10,7 @@ scripts/tables/casp16_stage1_kendall.py), taking the AF3 arm for every
 structure-based model.
 
 Palette is Okabe-Ito blue and orange, which stays distinguishable in the common
-forms of colour blindness and in greyscale print.
+forms of color blindness and in grayscale print.
 
 Output: results/figures/casp16_kendall.pdf / .png
 """

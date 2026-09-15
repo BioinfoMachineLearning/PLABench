@@ -21,7 +21,7 @@
 #   it against huggingface.co/datasets/photonmz/pdbbindpp-2020 to get the rows back.
 #
 #   CSAR-HiQ was never released under terms that allow redistribution, so the
-#   structures are not shipped. The standardised PDB-code/SMILES/pKd tables are. The
+#   structures are not shipped. The standardized PDB-code/SMILES/pKd tables are. The
 #   CSAR portal is gone; bindingmoad.org/Home/download still serves the CSAR-NRC HiQ
 #   set and its update, and Binding MOAD is a static archive now, so the safer route
 #   for these 87 complexes is to pull them from the RCSB by PDB code.
@@ -78,7 +78,7 @@ pdbbind_partition() {
 # here is a full if.
 
 # The names directly under $1, at most $2 of them, indented by $3. A subdirectory
-# is summarised by what it holds one level down, which is enough to tell a reader
+# is summarized by what it holds one level down, which is enough to tell a reader
 # whether they are looking at per-complex structure folders or at checkpoints.
 peek() {
     local dir="$1" limit="$2" pad="$3"
@@ -275,7 +275,7 @@ and three cases change what you get:
   https://huggingface.co/datasets/photonmz/pdbbindpp-2020
 
   CSAR-HiQ was never released under terms that allow redistribution, so the 36
-  and 51 structure sets are NOT here. Their standardised PDB-code / SMILES / pKd
+  and 51 structure sets are NOT here. Their standardized PDB-code / SMILES / pKd
   tables are, which is enough to rescore once you have the complexes. Fetch the
   87 entries from https://www.rcsb.org/ by PDB code.
 

@@ -49,7 +49,7 @@ NCI_JSON = "results/casp16/pose_ladder/nci_counts_by_rung.json"
 TYPES_CSV = "results/casp16/pose_ladder/rung_interaction_types.csv"
 OUT = "results/figures/fig_ladder_panels"
 
-# Wong colourblind-safe palette, as in the original figure.
+# Wong colorblind-safe palette, as in the original figure.
 BLUE, GREEN, ORANGE, PINK, PURPLE, GOLD = (
     "#0072B2", "#009E73", "#D55E00", "#CC79A7", "#6A3D9A", "#E69F00")
 GREY = "0.62"
@@ -118,7 +118,7 @@ def pearson(run: str, gt: pd.DataFrame) -> float:
 def declutter(labels, gap):
     """Push the inline labels apart so none overlaps, keeping their order.
 
-    `labels` is (y, name, colour); the returned y is where to draw the text, which
+    `labels` is (y, name, color); the returned y is where to draw the text, which
     may differ from the series' own y -- the caller draws a leader line then.
     """
     out = sorted(labels)
@@ -131,40 +131,40 @@ def declutter(labels, gap):
 def panel_a(ax, gt):
     x = range(4)
     labels = []
-    for name, (colour, marker, runs) in LADDER.items():
+    for name, (color, marker, runs) in LADDER.items():
         y = [pearson(r, gt) for r in runs]
-        ax.plot(x, y, color=colour, marker=marker, markersize=7, linewidth=2,
+        ax.plot(x, y, color=color, marker=marker, markersize=7, linewidth=2,
                 clip_on=False, zorder=3)
-        labels.append((y[-1], name, colour))
+        labels.append((y[-1], name, color))
         print(f"{name:<12} " + "  ".join(f"{v:+.3f}" for v in y))
 
-    for name, (colour, run) in FLAT.items():
+    for name, (color, run) in FLAT.items():
         v = pearson(run, gt)
         # a plot() rather than axhline() so the rule stops at the last rung and
         # leaves the label margin clear
-        ax.plot([0, 3], [v, v], color=colour, linestyle="--", linewidth=1.8,
+        ax.plot([0, 3], [v, v], color=color, linestyle="--", linewidth=1.8,
                 zorder=2)
-        labels.append((v, name, colour))
+        labels.append((v, name, color))
         print(f"{name:<12} flat {v:+.3f}")
 
     ax.set_ylim(0.35, 0.70)
     ax.set_ylabel("Pearson $r$ vs. experimental affinity", fontsize=13)
-    for (ty, name, colour), (y, _, _) in zip(declutter(labels, 0.016),
+    for (ty, name, color), (y, _, _) in zip(declutter(labels, 0.016),
                                              sorted(labels)):
         if abs(ty - y) > 1e-9:  # nudged, so show where the label belongs
-            ax.plot([3.02, 3.11], [y, ty], color=colour, linewidth=0.8,
+            ax.plot([3.02, 3.11], [y, ty], color=color, linewidth=0.8,
                     clip_on=False, zorder=2)
         ax.annotate(name, (3, ty), xytext=(12, 0), textcoords="offset points",
-                    va="center", color=colour, fontsize=12, annotation_clip=False)
+                    va="center", color=color, fontsize=12, annotation_clip=False)
 
 
 def panel_b(ax):
     t = pd.read_csv(TYPES_CSV)
     order = ["boltz2", "tplpocket", "af3"]
-    for key, label, colour, marker in NCI:
+    for key, label, color, marker in NCI:
         s = t[t.type == key].set_index("rung").total_pct
         y = [s[r] for r in order] + [0.0]  # the crystal rung is the reference
-        ax.plot(range(4), y, color=colour, marker=marker, markersize=7,
+        ax.plot(range(4), y, color=color, marker=marker, markersize=7,
                 linewidth=2, label=label, clip_on=False, zorder=3)
     ax.axhline(0, color="0.55", linewidth=1, zorder=1)
     ax.set_ylabel("Interaction count difference (%)\nrelative to crystal complex",

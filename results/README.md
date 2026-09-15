@@ -49,7 +49,7 @@ corpora, so these files are what makes the filtered benchmark reproducible.
 `selfcontrol.csv` and `sair_pklonly.csv` are controls and are not part of the
 union.
 
-`leak_by_corpus.csv` summarises that audit one corpus at a time.
+`leak_by_corpus.csv` summarizes that audit one corpus at a time.
 `rows_at_cut` counts the benchmark ligands a corpus reaches on its own, ignoring
 the other thirteen, so the column does not sum to the number of removed rows.
 `rows_attributed` does sum, because it assigns each removed row to whichever

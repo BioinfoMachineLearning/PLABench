@@ -49,7 +49,7 @@ SEP_ENSEMBLE = len(STRUCTURE_BASED) + len(STRUCTURE_INDEPENDENT)    # before Ens
 
 
 # eval_chembl35_filtered.py writes raw model keys and raw ChEMBL class names; the
-# published CSV carries the display forms. Normalise so either file can be plotted.
+# published CSV carries the display forms. Normalize so either file can be plotted.
 RENAME = {"boltz2": "Boltz2", "flowdock": "FlowDock", "flowr_root": "FLOWR.ROOT",
           "haiping": "Graph_RG", "bapred": "LCDD team", "mfe": "MFE",
           "deepdta": "Deepdta", "llf": "LLF", "mixingdta": "Mixingdta",

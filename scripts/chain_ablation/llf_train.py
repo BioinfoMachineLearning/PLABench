@@ -1,7 +1,7 @@
 """LLF chain-rule ablation, step 2: train one arm.
 
 A faithful clone of /home/lwfvx/Lyuwei/0.Projects/LLF/train_pdbbind_full.py -- same GCNNet,
-same optimiser, same cosine schedule, same early-stopping rule, same 90/10 split -- with the
+same optimizer, same cosine schedule, same early-stopping rule, same 90/10 split -- with the
 dataset paths, the window and the seed made parameters.
 
 Arms (see llf_build_data.py):
