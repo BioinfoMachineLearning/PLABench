@@ -323,8 +323,8 @@ repository root:
 WHAT IS NOT HERE, AND WHY
 
 PLABench artifacts are deposited; corpora other people built are linked instead.
-data/SOURCES.tsv in archive 01 gives the origin and the license of every path,
-and two cases change what you get:
+data/SOURCES.tsv in archive 01 gives the origin and the license of every path.
+These are the cases that change what you get:
 
   PDBbind v2020 forbids redistribution without written permission. Archive 01
   carries the 4,465 / 497 refined partition as compound_id,split and nothing
@@ -346,7 +346,7 @@ and two cases change what you get:
   it: the CASP16 metrics are scored from the labels in archive 01, and
   configs/manifests/ in the repository records which targets each stage-2 run
   covered, so scripts/collect_results.py reports the same 93 of 93 without it.
-  The five stage-2 configs themselves cannot be re-run until you have the
+  The six stage-2 configs themselves cannot be re-run until you have the
   complexes from https://predictioncenter.org/casp16/.
 
   The CASP16 stage-1 submissions of the other predictor groups
