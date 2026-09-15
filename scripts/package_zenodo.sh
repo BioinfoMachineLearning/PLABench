@@ -387,14 +387,22 @@ These are the cases that change what you get:
 
   The four Boltz-2 ones need only archive 02 and work straight after unpacking.
 
+  Archive 03 holds only the weights PLABench trained. Boltz-2, FLOWR.ROOT,
+  FlowDock, BA-Pred, Graph_RG/Haiping, ESM3 and the MixingDTA authors' Davis and
+  KIBA warm-start models stay with their own releases. checkpoints/THIRD_PARTY.tsv
+  gives the URL, SHA256, size and license of each file, and this fetches and
+  verifies them:
+
+      bash scripts/download_third_party.sh
+
 LICENSES
 
 The ChEMBL35 sets inherit ChEMBL's CC-BY-SA 3.0 and share-alike propagates. The
 Davis and KIBA folds and the target class map are CC-BY 4.0. The AlphaFold 3
 structures are covered by the AlphaFold 3 Output Terms of Use, non-commercially;
 see NOTICE_ALPHAFOLD3.txt in archive 02 for the modification notice those terms
-require. Third-party checkpoints keep the terms of their own releases, recorded
-per file in checkpoints/THIRD_PARTY.tsv. The code is MIT.
+require. No third-party checkpoint is deposited here; each keeps the terms of its
+own release, recorded per file in checkpoints/THIRD_PARTY.tsv. The code is MIT.
 EOF
 
 ( cd "$OUT" && sha256sum ./*.tar.gz ./*.tar.xz 2>/dev/null | sort -k2 > SHA256SUMS.txt )
