@@ -110,10 +110,12 @@ def main():
     counts = [link(*job, check_only=args.check) for job in JOBS]
     ready = sum(1 for c in counts if c)
     print(f"\n{ready} of {len(JOBS)} MFE input sets are ready.")
-    if ready < len(JOBS):
+    if any(c is None for c in counts):
         print("The rest need their corpus first. See data/SOURCES.tsv.")
-        return 1
-    return 0
+    # A corpus nobody is allowed to redistribute being absent is the normal state
+    # after unpacking the deposit, so it is not an error. A corpus that is on disk
+    # yet yielded no complete complex is, because that means a broken copy.
+    return 1 if any(c == 0 for c in counts) else 0
 
 
 if __name__ == "__main__":

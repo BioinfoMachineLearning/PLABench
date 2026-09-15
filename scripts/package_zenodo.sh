@@ -245,11 +245,23 @@ pack 02_af3_structures.tar.xz \
     data/Boltz2_tplpocket_structures/L3000
 
 # ---------------------------------------------------------------------------
-# (3) retrained checkpoints. checkpoints/structure holds third-party weights that
-# are linked, not redistributed, except MFE, which PLABench trained itself.
+# (3) retrained checkpoints. Both halves of checkpoints/ hold third-party weights
+# that are linked, not redistributed: under structure/ everything but MFE, and
+# under sequence/ the MixingDTA Davis and KIBA warm folds, which are the authors'
+# Google Drive release and carry no license. So the members below are spelled out
+# one PLABench-trained subtree at a time rather than as checkpoints/sequence. It
+# costs a line per model, and in exchange a directory nobody vetted cannot ride
+# along, and --dry-run shows what actually ships. MANIFEST.tsv is the authority
+# for which is which.
 # ---------------------------------------------------------------------------
 pack 03_checkpoints.tar.gz \
-    checkpoints/sequence \
+    checkpoints/sequence/deepdta \
+    checkpoints/sequence/llf \
+    checkpoints/sequence/mixingdta/pdbbind \
+    checkpoints/sequence/mixingdta/davis/cold_drug \
+    checkpoints/sequence/mixingdta/davis/cold_target \
+    checkpoints/sequence/mixingdta/kiba/cold_drug \
+    checkpoints/sequence/mixingdta/kiba/cold_target \
     checkpoints/structure/mfe \
     checkpoints/MANIFEST.tsv \
     checkpoints/THIRD_PARTY.tsv \

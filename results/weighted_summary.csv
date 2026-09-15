@@ -1,8 +1,8 @@
 Model,Key,Scope,N_total,N_series,RMSE,MSE,Pearson,Spearman,Kendall,CI,Rm2
-bapred,af3_chembl35_multimer,per_target,78,2,1.488,2.382,0.136,0.119,0.094,0.547,0.005
-flowdock,af3_chembl35_multimer,per_target,78,2,1.468,2.276,-0.16,-0.224,-0.164,0.417,-0.006
 bapred,af3_chembl35_full,per_target,7650,84,1.277,1.765,0.149,0.128,0.089,0.544,0.041
 flowdock,af3_chembl35_full,per_target,7650,84,1.351,2.133,0.155,0.143,0.1,0.55,0.055
+bapred,af3_chembl35_multimer,per_target,78,2,1.488,2.382,0.136,0.119,0.094,0.547,0.005
+flowdock,af3_chembl35_multimer,per_target,78,2,1.468,2.276,-0.16,-0.224,-0.164,0.417,-0.006
 boltz2,boltz2_chembl35_full,per_target,7650,84,1.287,1.805,0.335,0.325,0.227,0.614,0.118
 flowr_root,flowr_root_af3_chembl35_full,per_target,7650,84,0.903,0.876,0.441,0.421,0.301,0.651,0.21
 flowr_root,flowr_root_chembl35_multimer,per_target,78,2,1.085,1.302,-0.141,-0.143,-0.103,0.448,-0.004

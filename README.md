@@ -11,7 +11,7 @@ prediction", by Lyuwei Wang and Jianlin Cheng. See [Citation](#citation).
 
 ```bash
 git clone --recurse-submodules https://github.com/BioinfoMachineLearning/PLABench.git
-python run_benchmark.py model=boltz2 dataset=af3_chembl35_full
+python run_benchmark.py model=boltz2 dataset=boltz2_chembl35_full
 ```
 
 Each model needs its own conda environment and its own weights, so read
@@ -127,7 +127,7 @@ fetches and verifies them. Boltz-2 is the exception: it downloads itself into
 Benchmark inputs, ground truth and the AlphaFold3 structures are too large for
 git and live on Zenodo instead, at
 [doi:10.5281/zenodo.22716174](https://doi.org/10.5281/zenodo.22716174). Four
-archives, 1.8 GB to download and 6.3 GB unpacked, over `data/`, `checkpoints/`,
+archives, 1.4 GB to download and 5.8 GB unpacked, over `data/`, `checkpoints/`,
 `outputs/` and `results/`:
 
 | Archive | Holds |

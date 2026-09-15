@@ -75,10 +75,10 @@ def main(cfg: DictConfig):
         # Check if configs are properly loaded
         if 'name' not in cfg.model:
             log.error("Model config missing 'name'. Did you specify model=...?")
-            return
+            sys.exit(1)
         if 'name' not in cfg.dataset:
             log.error("Dataset config missing 'name'. Did you specify dataset=...?")
-            return
+            sys.exit(1)
 
         model_conf = OmegaConf.to_container(cfg.model, resolve=True)
         dataset_conf = OmegaConf.to_container(cfg.dataset, resolve=True)
@@ -92,7 +92,7 @@ def main(cfg: DictConfig):
         
     except Exception as e:
         log.error(f"Configuration resolution failed: {e}")
-        return
+        sys.exit(1)
 
     # Install the published archive only when this run actually lacks a
     # checkpoint. This keeps normal runs offline and makes a fresh clone usable.
@@ -100,7 +100,7 @@ def main(cfg: DictConfig):
         ensure_checkpoints(cfg.model, cfg.dataset)
     except Exception as e:
         log.error(f"Checkpoint setup failed: {e}")
-        return
+        sys.exit(1)
 
     # 2. Instantiate Wrapper
     try:
@@ -109,7 +109,7 @@ def main(cfg: DictConfig):
         log.info(f"Initialized {WrapperClass.__name__}")
     except Exception as e:
         log.error(f"Failed to initialize wrapper for {cfg.model.name}: {e}")
-        return
+        sys.exit(1)
 
     # 3. Execution
     try:
@@ -122,8 +122,9 @@ def main(cfg: DictConfig):
         
     except Exception as e:
         log.error(f"Execution failed: {e}")
-        # We don't exit(1) to allow cleanup if needed, but here we stop.
-        return
+        # Nonzero, so that a sweep driving this in a loop stops on a failed run
+        # instead of writing an empty predictions.csv and moving on.
+        sys.exit(1)
 
     # 4. Evaluation (Optional / Integrated)
     # Wrappers typically generate predictions.csv.
