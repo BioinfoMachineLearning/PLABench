@@ -35,6 +35,9 @@ keywords:
   - structure-based drug design
 identifiers:
   - type: doi
+    value: 10.5281/zenodo.22782934
+    description: Archived v1.0.0 source snapshot of this repository.
+  - type: doi
     value: 10.5281/zenodo.22716174
     description: >-
       Benchmark inputs, AlphaFold 3 and Boltz-2 structures,

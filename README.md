@@ -379,9 +379,12 @@ is one per model. `environments/` holds a conda export of all nine, and
 }
 ```
 
-The benchmark inputs, structures, checkpoints and predictions have their own
-DOI, [10.5281/zenodo.22716174](https://doi.org/10.5281/zenodo.22716174). Cite it
-too if you use the data on its own.
+Two DOIs go with the paper. The benchmark inputs, structures, checkpoints and
+predictions are at
+[10.5281/zenodo.22716174](https://doi.org/10.5281/zenodo.22716174), and the
+archived v1.0.0 source snapshot of this repository is at
+[10.5281/zenodo.22782934](https://doi.org/10.5281/zenodo.22782934). Cite whichever
+you used on its own.
 
 If you report a number from one of the nine models, cite that model's own paper
 as well. `forks/README.md` lists them.
