@@ -356,10 +356,13 @@ These are the cases that change what you get:
   else. Rejoin it against
   https://huggingface.co/datasets/photonmz/pdbbindpp-2020
 
-  CSAR-HiQ was never released under terms that allow redistribution, so the 36
-  and 51 structure sets are NOT here. Their standardized PDB-code / SMILES / pKd
-  tables are, which is enough to rescore once you have the complexes. Fetch the
-  87 entries from https://www.rcsb.org/ by PDB code.
+  CSAR-HiQ was never released under terms that allow redistribution and its
+  portal is gone, so the 36 and 51 structure sets are NOT here. Their
+  standardized PDB-code / SMILES / pKd tables are, which is enough to rescore
+  once you have the complexes. Binding MOAD's download page,
+  https://bindingmoad.org/Home/download, still serves the CSAR-NRC HiQ set and
+  its update; Binding MOAD is sunset and static now, so fetching the 87 entries
+  from https://www.rcsb.org/ by PDB code is the safer route.
 
   CASF-2013 and CASF-2016 come from the CASF authors under their own terms, so
   the core sets are not here either. Request them at
