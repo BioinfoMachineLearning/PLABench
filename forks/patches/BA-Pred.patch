@@ -1,0 +1,33 @@
+From 05acf82d8d34cf953399d2423a07176baf1058e4 Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:13 -0500
+Subject: [PATCH] Fall back to unsanitized PDB parsing when RDKit sanitization
+ fails
+
+PLABench benchmark patch: some pocket PDB blocks fail RDKit sanitization
+and returned None, aborting the whole complex. Retry with sanitize=False so
+the residue graph can still be built.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ bapred/data/data.py | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/bapred/data/data.py b/bapred/data/data.py
+index e1eb8a5..24e986a 100644
+--- a/bapred/data/data.py
++++ b/bapred/data/data.py
+@@ -269,7 +269,9 @@ class BAPredDataset(DGLDataset):
+             if int( line[22:26] ) in select_residue[ line[21] ]:
+                 total_lines += line
+         
+-        mol = Chem.MolFromPDBBlock( total_lines )
++        mol = Chem.MolFromPDBBlock( total_lines, sanitize=True )
++        if mol is None:
++            mol = Chem.MolFromPDBBlock( total_lines, sanitize=False )
+ 
+         return mol
+ 
+-- 
+2.43.7
+

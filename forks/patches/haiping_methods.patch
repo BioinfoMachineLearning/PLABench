@@ -1,0 +1,22 @@
+From 64b66b302cecbf28d0d08dfa3ab95b03627c955a Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:14 -0500
+Subject: [PATCH] Ignore __pycache__ and PLABench-linked checkpoint directories
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ .gitignore | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..7a60b85
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++__pycache__/
++*.pyc
+-- 
+2.43.7
+

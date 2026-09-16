@@ -36,6 +36,24 @@ BioinfoMachineLearning organization, transfer each repository on GitHub and
 replace `lyuweiorg` with `BioinfoMachineLearning` in `.gitmodules`, then run
 `git submodule sync`.
 
+## Patches
+
+`patches/` carries the same changes as standalone git patches, 33 KB for all
+nine forks. They exist so that a copy of this repository without the submodules
+is still enough to rebuild `forks/`, which is what the archived code snapshot
+relies on. To reconstruct one fork from its upstream:
+
+```bash
+git clone https://github.com/jwohlwend/boltz.git forks/boltz
+git -C forks/boltz checkout 832486d
+git -C forks/boltz am ../../forks/patches/boltz.patch
+```
+
+The upstream repository and the commit to check out are the second and third
+columns of the table above. `flowr_root` has no patch because it is unchanged
+from the pinned commit. Run `bash scripts/export_fork_patches.sh` to regenerate
+after touching any fork; it reads the commits out of that same table.
+
 ## Environments
 
 Each model has its own conda environment (paths are set in

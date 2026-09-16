@@ -1,0 +1,38 @@
+From 18d2154f99042dc8cb38a5194be09894c916bac3 Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:14 -0500
+Subject: [PATCH] Add atom_coords_batch to protein Data and ignore __pycache__
+
+PLABench benchmark patch: the surface encoder expects a per-atom batch
+index on the protein Data object; single-complex processing never set it.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ .gitignore | 2 ++
+ process.py | 1 +
+ 2 files changed, 3 insertions(+)
+ create mode 100644 .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..7a60b85
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++__pycache__/
++*.pyc
+diff --git a/process.py b/process.py
+index 9987f5c..ba51ae6 100644
+--- a/process.py
++++ b/process.py
+@@ -336,6 +336,7 @@ def load_protein_atoms(protein_path, item):
+     protein_data = Data(
+         atom_coords=torch.tensor(atom_coords),
+         atom_types=torch.tensor(atom_types,dtype=torch.float32),
++        atom_coords_batch=torch.zeros(atom_coords.shape[0], dtype=torch.long),
+     )
+     return protein_data
+ 
+-- 
+2.43.7
+

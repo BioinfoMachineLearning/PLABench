@@ -1,0 +1,174 @@
+From a9a5ef27e3608a05be8cec79662d812a53370ca4 Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:14 -0500
+Subject: [PATCH] FlowDock: deterministic batched sampling for PLABench
+
+PLABench benchmark patches to the vendored FlowDock sources:
+- sample.py: seed_everything(86) and deterministic algorithms (warn_only).
+- flowdock_fm_module.py: in csv_path mode write each sample_id to its own
+  subdirectory so auxiliary_estimation.csv and lig_*.sdf are not overwritten;
+  log and skip samples whose multi_pose_sampling raises instead of aborting.
+- components/flowdock.py: extend the template residue tables from 20 to 21
+  rows so UNK residues (index 20) index safely; run the pLDDT cumsum with
+  deterministic algorithms temporarily disabled (no deterministic CUDA kernel).
+- utils/data_utils.py: skip atoms whose element is not in element_id.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ .../src/models/components/flowdock.py         | 23 +++++++----
+ .../FlowDock/src/models/flowdock_fm_module.py | 40 ++++++++++++-------
+ forks/FlowDock/src/sample.py                  |  4 ++
+ forks/FlowDock/src/utils/data_utils.py        |  2 +
+ 4 files changed, 48 insertions(+), 21 deletions(-)
+
+diff --git a/forks/FlowDock/src/models/components/flowdock.py b/forks/FlowDock/src/models/components/flowdock.py
+index 10dacd7..1436473 100644
+--- a/forks/FlowDock/src/models/components/flowdock.py
++++ b/forks/FlowDock/src/models/components/flowdock.py
+@@ -699,24 +699,29 @@ class FlowDock(torch.nn.Module):
+             template_atom_idx_in_batch_padded = torch.full(
+                 (20, 37), fill_value=-1, dtype=torch.long, device=device
+             )
+-            template_atom37_mask = self.standard_aa_template_featset["features"][
++            template_atom37_mask_20aa = self.standard_aa_template_featset["features"][
+                 "res_atom_mask"
+             ].bool()
+-            template_atom_idx_in_batch_padded[template_atom37_mask] = torch.arange(
++            # Expand mask to include UNK residue at index 20 (all False - no atoms for UNK)
++            template_atom37_mask = torch.cat([
++                template_atom37_mask_20aa,
++                torch.zeros((1, 37), dtype=torch.bool, device=device)
++            ], dim=0)  # Now shape (21, 37)
++            template_atom_idx_in_batch_padded[template_atom37_mask_20aa] = torch.arange(
+                 167, device=device
+             )
+             atom_idx_in_batch_to_restype_idx = (
+                 torch.arange(20, device=device)[:, None]
+                 .expand(-1, 37)
+-                .contiguous()[template_atom37_mask]
++                .contiguous()[template_atom37_mask_20aa]
+             )
+             atom_idx_in_batch_to_atom37_idx = (
+                 torch.arange(37, device=device)[None, :]
+                 .expand(20, -1)
+-                .contiguous()[template_atom37_mask]
++                .contiguous()[template_atom37_mask_20aa]
+             )
+             template_padded_edge_mask_per_aa = torch.zeros(
+-                (20, 37, 37), dtype=torch.bool, device=device
++                (21, 37, 37), dtype=torch.bool, device=device  # 21 to include UNK residue at index 20
+             )
+             template_aa_graph_indexer = self.standard_aa_molgraph_featset["indexer"]
+             template_padded_edge_mask_per_aa[
+@@ -810,7 +815,7 @@ class FlowDock(torch.nn.Module):
+             )
+         # Gather graph features to the protein feature set
+         template_padded_node_feat_per_aa = torch.zeros(
+-            (20, 37, self.protein_cfg.residue_dim), device=device
++            (21, 37, self.protein_cfg.residue_dim), device=device  # 21 to include UNK residue at index 20
+         )
+         template_padded_node_feat_per_aa[template_atom37_mask] = self.molgraph_single_projector(
+             self.standard_aa_molgraph_featset["features"]["lig_atom_attr"]
+@@ -833,7 +838,7 @@ class FlowDock(torch.nn.Module):
+             .flatten(0, 1)
+         )
+         template_padded_edge_feat_per_aa = torch.zeros(
+-            (20, 37, 37, self.protein_cfg.pair_dim), device=device
++            (21, 37, 37, self.protein_cfg.pair_dim), device=device  # 21 to include UNK residue at index 20
+         )
+         template_padded_edge_feat_per_aa[
+             atom_idx_in_batch_to_restype_idx[template_aa_graph_indexer["gather_idx_uv_u"]],
+@@ -1311,7 +1316,11 @@ class FlowDock(torch.nn.Module):
+         plddt_logits = F.log_softmax(self.plddt_gram_head(conf_rep), dim=-1)
+         batch["outputs"]["plddt_logits"] = plddt_logits
+         plddt_gram = torch.exp(plddt_logits)
++        # Temporarily disable deterministic algorithms for cumsum (no deterministic CUDA implementation)
++        prev_deterministic_mode = torch.are_deterministic_algorithms_enabled()
++        torch.use_deterministic_algorithms(False)
+         batch["outputs"]["plddt"] = torch.cumsum(plddt_gram[:, :, :4], dim=-1).mean(dim=-1)
++        torch.use_deterministic_algorithms(prev_deterministic_mode)
+ 
+         if return_avg_stats:
+             plddt_avg = (batch["outputs"]["plddt"].view(batch_size, -1).mean(dim=1)).detach()
+diff --git a/forks/FlowDock/src/models/flowdock_fm_module.py b/forks/FlowDock/src/models/flowdock_fm_module.py
+index de007e4..7f5590b 100644
+--- a/forks/FlowDock/src/models/flowdock_fm_module.py
++++ b/forks/FlowDock/src/models/flowdock_fm_module.py
+@@ -790,20 +790,32 @@ class FlowDockFMLitModule(LightningModule):
+             with open(apo_rec_path, "w") as f:
+                 f.write(esmfold_pdb_output)
+ 
+-        _, _, _, _, _, all_frames, batch_all, b_factors, plddt_rankings = multi_pose_sampling(
+-            rec_path,
+-            ligand_paths,
+-            self.hparams.cfg,
+-            self,
+-            self.hparams.cfg.out_path,
+-            separate_pdb=self.hparams.cfg.separate_pdb,
+-            apo_receptor_path=apo_rec_path,
+-            sample_id=sample_id,
+-            protein=protein,
+-            sequences_to_embeddings=sequences_to_embeddings,
+-            return_all_states=self.hparams.cfg.task.visualize_generated_samples,
+-            auxiliary_estimation_only=self.hparams.cfg.task.auxiliary_estimation_only,
+-        )
++        # PLABench patch: when csv_path mode is in use, write per-sample subdirs
++        # so multiple sample_ids in the same out_path don't overwrite each other's
++        # auxiliary_estimation.csv / lig_*.sdf.
++        per_sample_out = self.hparams.cfg.out_path
++        if self.hparams.cfg.get("csv_path"):
++            per_sample_out = os.path.join(self.hparams.cfg.out_path, sample_id)
++            os.makedirs(per_sample_out, exist_ok=True)
++
++        try:
++            _, _, _, _, _, all_frames, batch_all, b_factors, plddt_rankings = multi_pose_sampling(
++                rec_path,
++                ligand_paths,
++                self.hparams.cfg,
++                self,
++                per_sample_out,
++                separate_pdb=self.hparams.cfg.separate_pdb,
++                apo_receptor_path=apo_rec_path,
++                sample_id=sample_id,
++                protein=protein,
++                sequences_to_embeddings=sequences_to_embeddings,
++                return_all_states=self.hparams.cfg.task.visualize_generated_samples,
++                auxiliary_estimation_only=self.hparams.cfg.task.auxiliary_estimation_only,
++            )
++        except Exception as e:
++            log.error(f"multi_pose_sampling failed for sample {sample_id} with error: {e}. Skipping...")
++            return None
+         # store model outputs for inspection
+         if self.hparams.cfg.task.visualize_generated_samples:
+             predict_outputs = {
+diff --git a/forks/FlowDock/src/sample.py b/forks/FlowDock/src/sample.py
+index 19a5b46..707134a 100644
+--- a/forks/FlowDock/src/sample.py
++++ b/forks/FlowDock/src/sample.py
+@@ -152,6 +152,10 @@ def sample(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+         cfg.csv_path is not None and os.path.exists(cfg.csv_path)
+     ), "Please provide either an input receptor and ligand or a CSV file with receptor and ligand sequences/filepaths."
+ 
++    from lightning import seed_everything
++    seed_everything(86, workers=True)
++    torch.use_deterministic_algorithms(True, warn_only=True)
++
+     log.info(
+         f"Setting `float32_matmul_precision` to {cfg.model.cfg.task.float32_matmul_precision}."
+     )
+diff --git a/forks/FlowDock/src/utils/data_utils.py b/forks/FlowDock/src/utils/data_utils.py
+index b2adb23..8b28f20 100644
+--- a/forks/FlowDock/src/utils/data_utils.py
++++ b/forks/FlowDock/src/utils/data_utils.py
+@@ -914,6 +914,8 @@ def pdb_filepath_to_protein(
+                     # NOTE: this is not a standard AlphaFold filter;
+                     # it was originally used in the NeuralPLexer parser
+                     continue
++                if atom.element not in residue_constants.element_id:
++                    continue
+                 eletypes[residue_constants.atom_order[atom.name]] = residue_constants.element_id[
+                     atom.element
+                 ]
+-- 
+2.43.7
+

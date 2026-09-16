@@ -1,0 +1,24 @@
+From 22eae99977c036179fb2748a0713a205f691ebb5 Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:14 -0500
+Subject: [PATCH] Ignore __pycache__ and PLABench-linked checkpoint directories
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ .gitignore | 4 ++++
+ 1 file changed, 4 insertions(+)
+ create mode 100644 .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..667dbbe
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,4 @@
++__pycache__/
++*.pyc
++# PLABench: trained weights live in PLABench/checkpoints and are linked in by scripts/download_checkpoints.sh
++models/
+-- 
+2.43.7
+

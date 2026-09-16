@@ -1,0 +1,86 @@
+From 31e2f6ad651bc864daebf8ad4b0de862026cf97c Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:14 -0500
+Subject: [PATCH] Add PDBbind 2020 refined (9:1 split) MEETA configuration
+
+PLABench benchmark addition: configuration used to train the four MEETA
+sub-models and the integration model on the PDBbind 2020 refined
+4465/497 train/validation split (MolFormer + ESM3-open-small embeddings,
+AdamW 5e-5, CyclicLR_v2, patience 50). plabench/models/mixingdta/inference.py
+imports `configuration` and `cases` from this module.
+
+Also ignore __pycache__ and the checkpoint directories that PLABench links in.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ .gitignore                          |  6 ++++
+ MEETA/config_pdbbind2020_refined.py | 44 +++++++++++++++++++++++++++++
+ 2 files changed, 50 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 MEETA/config_pdbbind2020_refined.py
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..d6d2392
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,6 @@
++__pycache__/
++*.pyc
++# PLABench: weights live in PLABench/checkpoints and are linked in by scripts/download_checkpoints.sh
++model_weights/
++MEETA/results_*/
++MEETA/result_integration/
+diff --git a/MEETA/config_pdbbind2020_refined.py b/MEETA/config_pdbbind2020_refined.py
+new file mode 100644
+index 0000000..d6059a3
+--- /dev/null
++++ b/MEETA/config_pdbbind2020_refined.py
+@@ -0,0 +1,44 @@
++import os
++
++none_case = {'result_root_path': "./results_none", 'connection': 'nothing', 'naive_GBA': False, 'is_mixup': False, 'reverse_mask': False}
++all_pair_case = {'result_root_path': "./results_all_pair", 'connection': 'nothing', 'naive_GBA': True, 'is_mixup': True, 'reverse_mask': False}
++drug_case = {'result_root_path': "./results_drug", 'connection': 'drug', 'naive_GBA': False, 'is_mixup': True, 'reverse_mask': False}
++protein_case = {'result_root_path': "./results_protein", 'connection': 'protein', 'naive_GBA': False, 'is_mixup': True, 'reverse_mask': False}
++protein_or_drug_case = {'result_root_path': "./results_drug_and_protein", 'connection': 'all', 'naive_GBA': False, 'is_mixup': True, 'reverse_mask': False}
++reversed_case = {'result_root_path': "./results_reversed", 'connection': 'all', 'naive_GBA': False, 'is_mixup': True, 'reverse_mask': True}
++
++cases = [none_case, all_pair_case, drug_case, protein_case, protein_or_drug_case, reversed_case]
++
++configuration = {
++    'dataset': 'PDBbind2020_raw',
++    'data_dir': '../DTA_DataBase',
++    'dataset_path': '/home/lwfvx/Lyuwei/0.Projects/MixingDTA/DTA_DataBase/datasets/PDBbind2020_raw',
++    'problem_type': 1,
++    'kde_type': 'gaussian',
++    'seed': 2024,
++    'num_epochs': 500,
++    'n_splits': 5,
++    'loss_f':"MSE",
++    'need_shuffle': True,
++    'drug':'MolFormer',
++    'protein':'ESM3_open_small',
++    'n_embd': 256,
++    'dropout_qkv': 0.,
++    'dropout_mlp': 0.1,
++    'masking': True,
++    'binary_classification': False,
++    'max_seq_len': 4700,
++    'cross_pos_bias_switch':False,
++    'batch_size': 64,
++    'optimizer': {'type': 'AdamW', 'lr': 5e-5, 'weight_decay': 5e-5},
++    'scheduler':{'use_scheduler': True, 'type': 'CyclicLR_v2'},
++    'kde_bandwidth': 21,
++    'mix_alpha': 2.0,
++    'patience': 50,
++    'Integration_mode': 'total',
++    'result_integration': './result_integration',
++    'pretrained_path': ['results_none', 'results_all_pair', 'results_drug', 'results_reversed'],
++    'n_mode': 4,
++    'show_process': 1,
++    'save_sampling_prob': False
++}
+-- 
+2.43.7
+

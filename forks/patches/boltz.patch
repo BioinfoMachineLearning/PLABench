@@ -1,0 +1,392 @@
+From f74ebf16b5b96658221b059344d414e2a094eef2 Mon Sep 17 00:00:00 2001
+From: lyuweiwang <lwfvx@missouri.edu>
+Date: Sun, 13 Sep 2026 22:58:13 -0500
+Subject: [PATCH] Template parsing fixes and confidence-module memory
+ reductions for PLABench
+
+PLABench benchmark patches on top of upstream 832486d (the commit the
+benchmark environment was installed from):
+- data/parse/mmcif.py: walk the alignment string with a separate sequence
+  index so gaps ('-') and mismatches ('.') no longer shift residue indices.
+- data/parse/schema.py: template chains without a sequence (ligand chains)
+  score 0 / are skipped instead of raising KeyError; template matching sees
+  every chain, not only protein chains.
+- model/layers/pairformer.py, model/modules/trunkv2.py: optional chunked
+  z-transition, enabled only for the confidence stack.
+- model/modules/confidencev2.py: accumulate the pair conditioning terms in
+  place, skip the no-op repeat_interleave when multiplicity == 1, and free
+  the distogram embedding early. Numerically identical; keeps ~3300-token
+  complexes under 80 GB.
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+---
+ src/boltz/data/parse/mmcif.py           | 26 +++++++++++++++--
+ src/boltz/data/parse/schema.py          | 31 ++++++++++++++++----
+ src/boltz/model/layers/pairformer.py    | 29 +++++++++++++++++--
+ src/boltz/model/modules/confidencev2.py | 38 ++++++++++++++++---------
+ src/boltz/model/modules/trunkv2.py      |  6 +++-
+ 5 files changed, 104 insertions(+), 26 deletions(-)
+
+diff --git a/src/boltz/data/parse/mmcif.py b/src/boltz/data/parse/mmcif.py
+index cade3c2..51d905d 100644
+--- a/src/boltz/data/parse/mmcif.py
++++ b/src/boltz/data/parse/mmcif.py
+@@ -581,16 +581,29 @@ def parse_polymer(  # noqa: C901, PLR0915, PLR0912
+ 
+     # Get coordinates and masks
+     i = 0
++    seq_idx = 0  # Track sequence index separately
+     ref_res = set(const.tokens)
+     parsed = []
+     for j, match in enumerate(result.match_string):
++        # Skip gaps in alignment
++        if match == '-':
++            continue
++
++        # For all other characters (match '|', mismatch '.', or space ' ')
++        # we need to advance through the sequence
++        if seq_idx >= len(sequence):
++            # We've processed all sequences, remaining are just alignment padding
++            break
++
+         # Get residue name from sequence
+-        res_name = sequence[j]
++        res_name = sequence[seq_idx]
++        seq_idx += 1
+ 
+         # Check if we have a match in the structure
+         res = None
+         name_to_atom = {}
+ 
++        # '|' means exact match, '.' means mismatch, ' ' means no alignment
+         if match == "|":
+             # Get pdb residue
+             res = polymer[i]
+@@ -603,6 +616,13 @@ def parse_polymer(  # noqa: C901, PLR0915, PLR0912
+ 
+             # Increment polymer index
+             i += 1
++        elif match == '.':
++            # Mismatch - structure has different residue than sequence
++            # Still need to get the structure residue if within bounds
++            if i < len(polymer):
++                res = polymer[i]
++                name_to_atom = {a.name.upper(): a for a in res}
++                i += 1
+ 
+         # Map MSE to MET, put the selenium atom in the sulphur column
+         if res_name == "MSE":
+@@ -617,7 +637,7 @@ def parse_polymer(  # noqa: C901, PLR0915, PLR0912
+                 residue = parse_ccd_residue(
+                     name=res_name,
+                     ref_mol=modified_mol,
+-                    res_idx=j,
++                    res_idx=seq_idx - 1,  # seq_idx was already incremented
+                     gemmi_mol=res,
+                     is_covalent=True,
+                 )
+@@ -696,7 +716,7 @@ def parse_polymer(  # noqa: C901, PLR0915, PLR0912
+                 type=const.token_ids[res_name],
+                 atoms=atoms,
+                 bonds=[],
+-                idx=j,
++                idx=seq_idx - 1,  # seq_idx was already incremented
+                 atom_center=atom_center,
+                 atom_disto=atom_disto,
+                 is_standard=True,
+diff --git a/src/boltz/data/parse/schema.py b/src/boltz/data/parse/schema.py
+index 9ffe7ad..dd27049 100644
+--- a/src/boltz/data/parse/schema.py
++++ b/src/boltz/data/parse/schema.py
+@@ -556,8 +556,12 @@ def get_template_records_from_search(
+         row = []
+         for template_chain_id in template_chain_ids:
+             chain_seq = sequences[chain_id]
+-            template_seq = template_sequences[template_chain_id]
+-            score = get_global_alignment_score(chain_seq, template_seq)
++            # Skip if template chain doesn't have a sequence (e.g., ligands)
++            template_seq = template_sequences.get(template_chain_id, "")
++            if not template_seq:
++                score = 0.0  # No alignment possible without sequence
++            else:
++                score = get_global_alignment_score(chain_seq, template_seq)
+             row.append(score)
+         score_matrix.append(row)
+ 
+@@ -571,7 +575,12 @@ def get_template_records_from_search(
+         chain_id = chain_ids[row_idx]
+         template_chain_id = template_chain_ids[col_idx]
+         chain_seq = sequences[chain_id]
+-        template_seq = template_sequences[template_chain_id]
++        template_seq = template_sequences.get(template_chain_id, "")
++
++        # Skip if template has no sequence (e.g., ligands)
++        if not template_seq:
++            continue
++
+         alignments = get_local_alignments(chain_seq, template_seq)
+ 
+         for alignment in alignments:
+@@ -606,7 +615,12 @@ def get_template_records_from_matching(
+     for chain_id, template_chain_id in zip(chain_ids, template_chain_ids):
+         # Align the sequences
+         chain_seq = sequences[chain_id]
+-        template_seq = template_sequences[template_chain_id]
++        template_seq = template_sequences.get(template_chain_id, "")
++
++        # Skip if template has no sequence (e.g., ligands)
++        if not template_seq:
++            continue
++
+         alignments = get_local_alignments(chain_seq, template_seq)
+         for alignment in alignments:
+             template_record = TemplateInfo(
+@@ -1599,6 +1613,11 @@ def parse_boltz_schema(  # noqa: C901, PLR0915, PLR0912
+     # Get protein sequences in this YAML
+     protein_seqs = {name: chains[name].sequence for name in protein_chains}
+ 
++    # Get all sequences for template matching (including empty sequences for ligands)
++    all_sequences = {}
++    for name, chain in chains.items():
++        all_sequences[name] = chain.sequence if chain.sequence is not None else ""
++
+     # Parse templates
+     template_schema = schema.get("templates", [])
+     if template_schema and not boltz_2:
+@@ -1706,7 +1725,7 @@ def parse_boltz_schema(  # noqa: C901, PLR0915, PLR0912
+                 get_template_records_from_matching(
+                     template_id=template_id,
+                     chain_ids=chain_ids,
+-                    sequences=protein_seqs,
++                    sequences=all_sequences,
+                     template_chain_ids=template_chain_ids,
+                     template_sequences=parsed_template.sequences,
+                     force=force,
+@@ -1718,7 +1737,7 @@ def parse_boltz_schema(  # noqa: C901, PLR0915, PLR0912
+                 get_template_records_from_search(
+                     template_id=template_id,
+                     chain_ids=chain_ids,
+-                    sequences=protein_seqs,
++                    sequences=all_sequences,
+                     template_chain_ids=template_chain_ids,
+                     template_sequences=parsed_template.sequences,
+                     force=force,
+diff --git a/src/boltz/model/layers/pairformer.py b/src/boltz/model/layers/pairformer.py
+index 7edadbf..efc3edc 100644
+--- a/src/boltz/model/layers/pairformer.py
++++ b/src/boltz/model/layers/pairformer.py
+@@ -71,6 +71,7 @@ class PairformerLayer(nn.Module):
+         use_kernels: bool = False,
+         use_cuequiv_mul: bool = False,
+         use_cuequiv_attn: bool = False,
++        chunk_size_transition_z: Optional[int] = None,
+     ) -> tuple[Tensor, Tensor]:
+         # Compute pairwise stack
+         dropout = get_dropout_mask(self.dropout, z, self.training)
+@@ -99,7 +100,7 @@ class PairformerLayer(nn.Module):
+             use_kernels=use_cuequiv_attn or use_kernels,
+         )
+ 
+-        z = z + self.transition_z(z)
++        z = z + self.transition_z(z, chunk_size_transition_z)
+ 
+         # Compute sequence stack
+         with torch.autocast("cuda", enabled=False):
+@@ -128,6 +129,7 @@ class PairformerModule(nn.Module):
+         post_layer_norm: bool = False,
+         activation_checkpointing: bool = False,
+         v2: bool = False,
++        chunk_transition_z: bool = False,
+         **kwargs,
+     ) -> None:
+         super().__init__()
+@@ -137,6 +139,9 @@ class PairformerModule(nn.Module):
+         self.num_heads = num_heads
+         self.post_layer_norm = post_layer_norm
+         self.activation_checkpointing = activation_checkpointing
++        # Chunking the z-transition costs wall-clock, so only the stacks that
++        # actually run out of memory ask for it (the confidence module).
++        self.chunk_transition_z = chunk_transition_z
+ 
+         self.layers = nn.ModuleList()
+         for _ in range(num_blocks):
+@@ -180,10 +185,13 @@ class PairformerModule(nn.Module):
+         if not self.training:
+             if z.shape[1] > const.chunk_size_threshold:
+                 chunk_size_tri_attn = 128
++                chunk_size_transition_z = 64 if self.chunk_transition_z else None
+             else:
+                 chunk_size_tri_attn = 512
++                chunk_size_transition_z = None
+         else:
+             chunk_size_tri_attn = None
++            chunk_size_transition_z = None
+ 
+         for layer in self.layers:
+             if self.activation_checkpointing and self.training:
+@@ -197,7 +205,15 @@ class PairformerModule(nn.Module):
+                     use_kernels,
+                 )
+             else:
+-                s, z = layer(s, z, mask, pair_mask, chunk_size_tri_attn, use_kernels)
++                s, z = layer(
++                    s,
++                    z,
++                    mask,
++                    pair_mask,
++                    chunk_size_tri_attn,
++                    use_kernels,
++                    chunk_size_transition_z=chunk_size_transition_z,
++                )
+         return s, z
+ 
+ 
+@@ -237,6 +253,7 @@ class PairformerNoSeqLayer(nn.Module):
+         use_kernels: bool = False,
+         use_cuequiv_mul: bool = False,
+         use_cuequiv_attn: bool = False,
++        chunk_size_transition_z: Optional[int] = None,
+     ) -> Tensor:
+         # Compute pairwise stack
+         dropout = get_dropout_mask(self.dropout, z, self.training)
+@@ -265,7 +282,7 @@ class PairformerNoSeqLayer(nn.Module):
+             use_kernels=use_cuequiv_attn or use_kernels,
+         )
+ 
+-        z = z + self.transition_z(z)
++        z = z + self.transition_z(z, chunk_size_transition_z)
+         return z
+ 
+ 
+@@ -281,6 +298,7 @@ class PairformerNoSeqModule(nn.Module):
+         pairwise_num_heads: int = 4,
+         post_layer_norm: bool = False,
+         activation_checkpointing: bool = False,
++        chunk_transition_z: bool = False,
+         **kwargs,
+     ) -> None:
+         super().__init__()
+@@ -289,6 +307,7 @@ class PairformerNoSeqModule(nn.Module):
+         self.dropout = dropout
+         self.post_layer_norm = post_layer_norm
+         self.activation_checkpointing = activation_checkpointing
++        self.chunk_transition_z = chunk_transition_z
+ 
+         self.layers = nn.ModuleList()
+         for i in range(num_blocks):
+@@ -311,10 +330,13 @@ class PairformerNoSeqModule(nn.Module):
+         if not self.training:
+             if z.shape[1] > const.chunk_size_threshold:
+                 chunk_size_tri_attn = 128
++                chunk_size_transition_z = 64 if self.chunk_transition_z else None
+             else:
+                 chunk_size_tri_attn = 512
++                chunk_size_transition_z = None
+         else:
+             chunk_size_tri_attn = None
++            chunk_size_transition_z = None
+ 
+         for layer in self.layers:
+             if self.activation_checkpointing and self.training:
+@@ -331,5 +353,6 @@ class PairformerNoSeqModule(nn.Module):
+                     pair_mask,
+                     chunk_size_tri_attn,
+                     use_kernels,
++                    chunk_size_transition_z=chunk_size_transition_z,
+                 )
+         return z
+diff --git a/src/boltz/model/modules/confidencev2.py b/src/boltz/model/modules/confidencev2.py
+index 3dedc5f..1775894 100644
+--- a/src/boltz/model/modules/confidencev2.py
++++ b/src/boltz/model/modules/confidencev2.py
+@@ -95,6 +95,7 @@ class ConfidenceModule(nn.Module):
+         self.pairformer_stack = PairformerModule(
+             token_s,
+             token_z,
++            chunk_transition_z=True,
+             **pairformer_args,
+         )
+         self.return_latent_feats = return_latent_feats
+@@ -160,30 +161,37 @@ class ConfidenceModule(nn.Module):
+         if self.add_s_input_to_s:
+             s = s + self.s_input_to_s(s_inputs)
+ 
++        # z_norm returns a fresh tensor, so the conditioning terms below can be
++        # accumulated in place.  The caller's z is never touched, and under
++        # run_sequentially each sample re-enters here and gets its own copy.
++        # Every `z = z + term` used to allocate another (1, n, n, token_z)
++        # float32 buffer -- 5.2 GiB apiece at 3308 tokens -- while the previous
++        # one was still bound, which is what pushed the 3280-token arms over 80 GB.
+         z = self.z_norm(z)
+ 
+         if self.add_z_input_to_z:
+-            relative_position_encoding = self.rel_pos(feats)
+-            z = z + relative_position_encoding
+-            z = z + self.token_bonds(feats["token_bonds"].float())
++            z += self.rel_pos(feats)
++            z += self.token_bonds(feats["token_bonds"].float())
+             if self.bond_type_feature:
+-                z = z + self.token_bonds_type(feats["type_bonds"].long())
+-            z = z + self.contact_conditioning(feats)
++                z += self.token_bonds_type(feats["type_bonds"].long())
++            z += self.contact_conditioning(feats)
+ 
+         s = s.repeat_interleave(multiplicity, 0)
+ 
+-        z = (
+-            z
+-            + self.s_to_z(s_inputs)[:, :, None, :]
+-            + self.s_to_z_transpose(s_inputs)[:, None, :, :]
+-        )
++        z += self.s_to_z(s_inputs)[:, :, None, :]
++        z += self.s_to_z_transpose(s_inputs)[:, None, :, :]
+         if self.add_s_to_z_prod:
+-            z = z + self.s_to_z_prod_out(
++            z += self.s_to_z_prod_out(
+                 self.s_to_z_prod_in1(s_inputs)[:, :, None, :]
+                 * self.s_to_z_prod_in2(s_inputs)[:, None, :, :]
+             )
+ 
+-        z = z.repeat_interleave(multiplicity, 0)
++        # run_sequentially re-enters with multiplicity == 1, where this is a
++        # value-preserving copy of a (1, n, n, token_z) float32 buffer -- 5.2 GiB
++        # at 3308 tokens, for nothing.  z is already private to this call (it
++        # came out of z_norm above), so skipping the copy is safe.
++        if multiplicity > 1:
++            z = z.repeat_interleave(multiplicity, 0)
+         s_inputs = s_inputs.repeat_interleave(multiplicity, 0)
+ 
+         token_to_rep_atom = feats["token_to_rep_atom"]
+@@ -197,7 +205,11 @@ class ConfidenceModule(nn.Module):
+         d = torch.cdist(x_pred_repr, x_pred_repr)
+         distogram = (d.unsqueeze(-1) > self.boundaries).sum(dim=-1).long()
+         distogram = self.dist_bin_pairwise_embed(distogram)
+-        z = z + distogram
++        # Accumulate in place and drop the embedding immediately: both are
++        # full (1, n, n, token_z) float32 buffers, and the pairformer stack
++        # below is what actually runs out of room.
++        z += distogram
++        del distogram
+ 
+         mask = feats["token_pad_mask"].repeat_interleave(multiplicity, 0)
+         pair_mask = mask[:, :, None] * mask[:, None, :]
+diff --git a/src/boltz/model/modules/trunkv2.py b/src/boltz/model/modules/trunkv2.py
+index ebd7a2e..62f5c9a 100644
+--- a/src/boltz/model/modules/trunkv2.py
++++ b/src/boltz/model/modules/trunkv2.py
+@@ -752,7 +752,11 @@ class MSALayer(nn.Module):
+ 
+         # Compute pairwise stack
+         z = self.pairformer_layer(
+-            z, token_mask, chunk_size_tri_attn, use_kernels=use_kernels
++            z,
++            token_mask,
++            chunk_size_tri_attn,
++            use_kernels=use_kernels,
++            chunk_size_transition_z=chunk_size_transition_z,
+         )
+ 
+         return z, m
+-- 
+2.43.7
+
