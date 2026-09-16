@@ -1,0 +1,58 @@
+cff-version: 1.2.0
+title: PLABench
+message: >-
+  If you use PLABench, cite the paper below. If you use the
+  deposited inputs, structures, checkpoints or predictions on
+  their own, cite the data DOI as well.
+type: software
+abstract: >-
+  A leakage-controlled benchmark for protein-ligand binding
+  affinity prediction. It runs nine models, sequence-based and
+  structure-based, over the same targets under the same metrics,
+  and varies the input structure so that pose quality can be told
+  apart from model quality.
+authors:
+  - given-names: Lyuwei
+    family-names: Wang
+    orcid: https://orcid.org/0009-0003-7678-4972
+    affiliation: University of Missouri
+  - given-names: Jianlin
+    family-names: Cheng
+    orcid: https://orcid.org/0000-0003-0305-2853
+    affiliation: University of Missouri
+repository-code: https://github.com/BioinfoMachineLearning/PLABench
+url: https://github.com/BioinfoMachineLearning/PLABench
+license: MIT
+version: 1.0.0
+date-released: '2026-09-15'
+keywords:
+  - binding affinity prediction
+  - protein-ligand interaction
+  - benchmark
+  - data leakage
+  - generalization
+  - deep learning
+  - structure-based drug design
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22716174
+    description: >-
+      Benchmark inputs, AlphaFold 3 and Boltz-2 structures,
+      trained checkpoints, predictions and metrics.
+preferred-citation:
+  type: article
+  title: >-
+    Leakage-controlled benchmarking reveals generalization limits
+    of deep learning for protein-ligand binding affinity
+    prediction
+  authors:
+    - given-names: Lyuwei
+      family-names: Wang
+      orcid: https://orcid.org/0009-0003-7678-4972
+      affiliation: University of Missouri
+    - given-names: Jianlin
+      family-names: Cheng
+      orcid: https://orcid.org/0000-0003-0305-2853
+      affiliation: University of Missouri
+  year: 2026
+  notes: Manuscript in submission
